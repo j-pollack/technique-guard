@@ -3,14 +3,13 @@
 import os
 from pathlib import Path
 
-from anti_venom import PROMPTS, check, judge
+from anti_venom import QUESTIONS, check, judge
 
 
-def fake(intent: str, confidence: float = 0.9, **nouls: float) -> list[dict]:
-    out = [{"key": p["key"], "type": "noul", "probability": nouls.get(p["key"], 0.05)} for p in PROMPTS if p["type"] == "noul"]
+def fake(intent: str, confidence: float = 0.9, **nouls: float) -> dict[str, dict]:
+    out = {k: {"type": "noul", "noul": nouls.get(k, 0.05)} for k, q in QUESTIONS.items() if q["type"] == "noul"}
     probs = {"benign": 0.05, "prompt_injection": 0.05, "jailbreak": 0.05, intent: 0.9}
-    out.append({"key": "intent", "type": "choice", "chosen": intent, "confidence": confidence,
-                "probabilities": [{"option": o, "probability": p} for o, p in probs.items()]})
+    out["intent"] = {"type": "choice", "choice": intent, "confidence": confidence, "probabilities": probs}
     return out
 
 

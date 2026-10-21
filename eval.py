@@ -67,7 +67,7 @@ def build(n: int) -> list[dict]:
 def score(item: dict) -> dict:
     try:
         v = check(item["text"])
-        return {"text": item["text"], "action": v.action, "category": v.category, "risk": v.risk}
+        return {"text": item["text"], "model": v.model, "action": v.action, "category": v.category, "risk": v.risk}
     except Exception as e:  # one bad item (too long, timeout) shouldn't sink the run
         return {"text": item["text"], "error": repr(e)}
 
@@ -89,7 +89,7 @@ def main(n: int):
 
     rows = [{**i, **cache[i["text"]]} for i in items]
     ok = [r for r in rows if "error" not in r]
-    print(f"\n{len(rows) - len(ok)} errors\n")
+    print(f"\n{len(rows) - len(ok)} errors, models: {sorted({r.get('model', '?') for r in ok})}\n")
     print(f"{'source':14} {'n':>4} {'block':>6} {'review':>7} {'allow':>6}   (attacks: want block; benign: want allow)")
     for source, *_ in SOURCES:
         rs = [r for r in ok if r["source"] == source]
