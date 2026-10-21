@@ -36,7 +36,8 @@ Put keys in `.env.local` (git-ignored):
 |---|---|
 | `TYPESAFE_API_KEY` | `anti_venom.py`, `hillclimb.py`, `freeze.py`, `final_eval.py` |
 | `HF_TOKEN` | `corpus.py`, to pull the gated Hugging Face datasets (accept their terms first) |
-| `ANTHROPIC_API_KEY` | `audit.py`, `judge.py` |
+| `ANTHROPIC_API_KEY` | `audit.py`, `judge.py`, `replay.py` |
+| `OPENROUTER_API_KEY` | `replay.py` |
 
 ## Tests
 
@@ -57,7 +58,7 @@ The research pipeline, in order:
 5. **`freeze.py`** writes `guard.json` with the questions, weights, and block/review thresholds (5% / 10% benign FPR on out-of-fold dev scores).
 6. **`final_eval.py`** scores the frozen guard on the held-out test split. Run it once per frozen guard, because it warns on reruns.
 
-`judge.py` is a StrongREJECT-style grader for Phase 2, which checks whether attacks that slip past the guard actually work on real models. It isn't wired in yet.
+7. **`replay.py`** (Phase 2) sends a sample of test attacks, half blocked and half missed by the frozen guard, to 9 OpenRouter models and checks whether each worked: built-in checks for HackAPrompt, Tensor Trust and InjecAgent, `judge.py` (a StrongREJECT-style Sonnet grader) for the jailbreak families. It joins the results with the guard's verdicts to give recall on attacks that work, per family and per target. `replay.py 40` runs the full ~4,300 jobs; `--dry-run` only plans and reports from the cache; `--max-openrouter` / `--max-judge` cap spend for the whole replay. Results are cached per (attack, target) in `data/replay.jsonl` and summarized in `data/replay_results.json`.
 
 `data/` and `datasets/` are git-ignored, because several sources forbid redistribution.
 
