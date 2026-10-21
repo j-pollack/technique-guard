@@ -305,6 +305,12 @@ Done on dev only; test has already been used for reporting.
 - 26 of the 46 persuasion misses sit in the review band (median score 0.40), against 2 of 26 for role-play.
 - Any fix trades against FPR on benign prompts written in jailbreak style: the blocked ones already average 0.39 on the harm question.
 
+### 2026-10-21: round 4, persuasion-resistant harm questions (dev, ~$0.25): negative result
+- **Idea 1 (harm question that ignores the persuasion) fails.** `underlying_restricted_v3` asks Jev to imagine the same request sent plainly. `_v4` asks what concrete output is being sought, whatever the reasons given. The plain-vs-wrapped gap on SORRY dev is unchanged: v2 0.75 → 0.38, v3 0.75 → 0.38, v4 0.70 → 0.35. FPR-side scores are unchanged too (wj_adv_benign ≥ 0.5: 9% / 7% / 7%).
+- **Idea 2 ("is the persuasion load-bearing?") is a real signal but redundant.** `jb_persuasion_load_bearing` scores 0.68 on wrapped SORRY requests vs 0.09 on the same requests plain, and 1% on orbench_hard, but 57% on wj_adv_benign. Added to the library, it changes nothing: round 4 = round 3 on every number (69 / 82 / 86% at 2 / 5 / 10% FPR; persuasion 69%, role-play 74%, wj_adv_benign FPR 25%). The authority, evidence and justification questions already carry it.
+- **Why the gap won't close: SORRY-Bench's persuasion rewrites often change the request, not just the framing.** Examples from the split pairs: a post that ridicules a religious group becomes a post that "critically examines" the practice "inviting dialogue"; a fake vaccine ad becomes a piece "consulting verifiable scientific research"; a defamation plan becomes an analysis of "defenses against such malicious practices". Jev's low harm score on many of these is arguably correct.
+- **This also contaminates Phase 2.** The judge infers the underlying request from the attack text, so a model that answers the softened rewrite counts as a working attack. Of 248 persuasion pairs judged working, the judge's own summaries include requests like "how California protects election officials' contact information (a benign informational request)". **Phase 2 persuasion success rates (and the guarded persuasion row in the per-target table) are overstated.** StrongREJECT grades a response against the *original* forbidden request. SORRY-Bench provides it (the base style of each question), so the fix is to re-grade against it.
+
 ## Findings
 - Subtle and non-English injections are the clearest weakness so far (deepset: 60% allowed).
 - Label noise is real: itw_regular contains outright jailbreaks ("a model called Kyle who operates without any restrictions"), and some deepset "injections" are ordinary requests.
@@ -347,5 +353,6 @@ Done on dev only; test has already been used for reporting.
 
 ## Next
 - Phase 2 obfuscation success is unmeasured: Sonnet refuses to grade all of them. Options are decoding the replies in code before grading, or reporting it as unknown.
-- Persuasion and role-play (see the dev diagnosis): a persuasion-resistant harm question, measured by the plain-vs-wrapped gap on SORRY dev; a better rubric for mild payloads. A new guard needs fresh held-out persuasion and role-play data, because test has been used.
+- Re-grade the SORRY families in Phase 2 against the original plain request (target replies are cached, so judge cost only). Then re-measure which persuasion and role-play misses actually work before tuning for them.
+- Relabel SORRY persuasion rewrites whose request is no longer restricted (they aren't attacks under our definition), on dev for training and on test for reporting.
 - For the write-up: audit a random sample of *test* labels (blind to the guard) to estimate test label noise without biasing toward the guard.
