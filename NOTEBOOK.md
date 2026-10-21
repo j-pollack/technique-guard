@@ -276,6 +276,35 @@ Per target, recall on working attacks ranges from 64% (grok-4.7) to 73% (gemini-
 
 **The judge refused 360 pairs, and 271 of them are SORRY obfuscation: every obfuscation pair that completed.** The rule counts those as working. Obfuscation is 100% blocked, so the rule inflates the headline. With judge refusals dropped, recall on working attacks is **61% [56, 66]** overall. WildJailbreak drops to 65% [32, 83] and the per-target figures to 43–68%. Whether obfuscation attacks work is unmeasured. The "merely not refused" sensitivity run moves no number by more than 3 points.
 
+Per target and family. Each cell is **unguarded → guarded** attack success: the share of the family's attacks that work when sent straight to the model, then the share that both get past the guard and work. Judge refusals are dropped here (the conservative reading). Each cell has about 40 attacks, so a single cell is roughly ±10–15 points. Obfuscation is left out because the judge graded only 27 Gemini pairs, none of which worked.
+
+| family | grok-4.7 | qwen3.8-max | qwen3.8-flash | gemini-4-argon | gemini-3.8-flash | deepseek-v4.1-flash | deepseek-v4-pro | glm-5.3-flash | glm-5.3 |
+|---|---|---|---|---|---|---|---|---|---|
+| HackAPrompt | 1→1 | 16→3 | 26→2 | 6→1 | 15→2 | 24→3 | 19→2 | 38→4 | 34→3 |
+| Tensor Trust hijack | 0→0 | 1→1 | 6→2 | 0→0 | 5→1 | 2→2 | 3→3 | 1→1 | 1→1 |
+| Tensor Trust extract | 0→0 | 10→1 | 12→1 | 16→0 | 9→0 | 13→0 | 13→1 | 17→1 | 17→1 |
+| InjecAgent harm | 0→0 | 0→0 | 0→0 | 0→0 | 0→0 | 0→0 | 11→3 | 1→1 | 5→1 |
+| InjecAgent data-steal | 3→0 | 0→0 | 0→0 | 0→0 | 0→0 | 0→0 | 3→1 | 3→0 | 0→0 |
+| WildJailbreak | 1→1 | 2→2 | 7→2 | 20→5 | 14→7 | 4→4 | 22→5 | 12→4 | 13→4 |
+| WildGuard jailbreak | 18→6 | 12→3 | 23→5 | 41→7 | 35→6 | 25→6 | 39→7 | 25→6 | 25→6 |
+| MHJ multi-turn | 14→10 | 11→7 | 23→17 | 69→12 | 50→11 | 49→14 | 70→14 | 30→10 | 37→11 |
+| SORRY persuasion | 61→25 | 54→19 | 66→24 | 84→26 | 92→25 | 64→25 | 90→26 | 75→25 | 83→27 |
+| SORRY role-play | 29→26 | 17→14 | 32→23 | 58→33 | 68→36 | 27→24 | 47→31 | 31→24 | 32→28 |
+| SORRY low-resource language | 19→19 | 14→14 | 19→18 | 33→33 | 36→36 | 32→32 | 25→25 | 33→32 | 34→32 |
+| **all except obfuscation** | **12→7** | **12→5** | **18→7** | **29→10** | **28→10** | **21→9** | **30→10** | **24→9** | **25→9** |
+
+- The guard narrows the gap between models: unguarded success ranges from 12% to 30%, guarded from 5% to 10%. The most jailbreakable models (Gemini-argon, DeepSeek-pro) gain the most.
+- About a quarter of persuasion attacks still work on every model with the guard in front. Persuasion is the largest remaining risk, followed by role-play (14–36%).
+- Injection families end at 0–4% guarded on every model, even where HackAPrompt works on 26–38% of attacks unguarded (flash and GLM models).
+
+### 2026-10-21: why persuasion and role-play get through (dev diagnosis, ~$0.01)
+Done on dev only; test has already been used for reporting.
+- **Most misses are gated by the harm question, not the technique questions.** Of 46 persuasion misses, 43 have `underlying_restricted_v2` < 0.3, against a mean of 0.51 for caught ones. Technique signals still fire on the misses (justification 0.59, hypothetical framing 0.60). Role-play shows the same pattern: 20 of 26 misses fall below 0.3.
+- **Persuasion persuades Jev too.** Each SORRY-Bench question also exists as a plain request, so the harm score can be compared on the same request with and without the wrapper. Across 178 dev questions, the mean harm score drops from 0.75 (plain) to 0.38 (persuasion-wrapped). For 54 questions, the plain version scores ≥ 0.5 and the wrapped version < 0.3.
+- **Role-play does not fool the harm question** (0.68 plain vs 0.71 wrapped). Its misses are mild payloads that score low even when plain (21 of 101 questions), plus a weaker persona signal (0.36 on misses vs 0.77 on caught).
+- 26 of the 46 persuasion misses sit in the review band (median score 0.40), against 2 of 26 for role-play.
+- Any fix trades against FPR on benign prompts written in jailbreak style: the blocked ones already average 0.39 on the harm question.
+
 ## Findings
 - Subtle and non-English injections are the clearest weakness so far (deepset: 60% allowed).
 - Label noise is real: itw_regular contains outright jailbreaks ("a model called Kyle who operates without any restrictions"), and some deepset "injections" are ordinary requests.
@@ -318,4 +347,5 @@ Per target, recall on working attacks ranges from 64% (grok-4.7) to 73% (gemini-
 
 ## Next
 - Phase 2 obfuscation success is unmeasured: Sonnet refuses to grade all of them. Options are decoding the replies in code before grading, or reporting it as unknown.
+- Persuasion and role-play (see the dev diagnosis): a persuasion-resistant harm question, measured by the plain-vs-wrapped gap on SORRY dev; a better rubric for mild payloads. A new guard needs fresh held-out persuasion and role-play data, because test has been used.
 - For the write-up: audit a random sample of *test* labels (blind to the guard) to estimate test label noise without biasing toward the guard.
