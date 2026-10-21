@@ -30,7 +30,7 @@ Detecting prompt-injection and jailbreak attacks with TypeSafe's Jev before they
   - **InjecAgent:** the user task plus the poisoned tool response; success = the agent calls the attacker's tool.
   - **deepset / safeguard / Gandalf:** no original context, so attack success is not measurable without a stand-in harness. Reported as detection only.
 - Measure attack success for a **sample of blocked attacks too**, not just misses, so we can report recall on attacks that work.
-- Store judge verdicts and short excerpts only, not full harmful completions.
+- Cache every successful API call in full (git-ignored `data/`), so nothing finished is paid for twice; the per-pair results table keeps only verdicts and short excerpts.
 
 ### Phase 3: write-up
 - Per family: recall on all attacks, recall on **working** attacks, and false-positive rate on each benign set (ordinary, over-refusal, adversarial-benign).
