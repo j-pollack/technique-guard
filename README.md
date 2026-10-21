@@ -66,6 +66,8 @@ The research pipeline, in order:
 
 On the held-out test split (guard `6fdeebfecb47872f`, 3,816 items, scored once), the frozen guard **blocks 82.4% of attacks [95% CI 80.8–83.9] while blocking 7.0% of non-attacks [5.9–8.4]**. That rises to 86.0% and 10.3% if you count review. The first max-of-signals guard blocked 61.4% of attacks at 5.8%. On the four sources never seen during tuning, it blocks 86% of HackAPrompt, 99% of InjecAgent data-stealing and 93% of WildGuardMix jailbreaks, and wrongly blocks 1% of XSTest.
 
+Phase 2 replayed 480 test attacks against 9 OpenRouter models. Missed attacks worked 41% of the time and blocked ones 26%. So the guard blocks **61–70% of the attacks that actually work** (the range depends on how pairs the judge refused to grade are counted), against 80% of these attacks overall. Role-play is the weakest: it blocks 33% of the role-play attacks that work.
+
 Known weak spots:
 - **Benign prompts written in jailbreak style.** About 35% of WildGuardMix's adversarial-benign prompts are blocked. This is where nearly all false positives come from; ordinary and over-refusal prompts sit at 0–6%.
 - **Role-play (61%) and persuasion (74%) jailbreaks.**
