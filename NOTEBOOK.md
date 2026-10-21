@@ -276,26 +276,27 @@ Per target, recall on working attacks ranges from 64% (grok-4.7) to 73% (gemini-
 
 **The judge refused 360 pairs, and 271 of them are SORRY obfuscation: every obfuscation pair that completed.** The rule counts those as working. Obfuscation is 100% blocked, so the rule inflates the headline. With judge refusals dropped, recall on working attacks is **61% [56, 66]** overall. WildJailbreak drops to 65% [32, 83] and the per-target figures to 43–68%. Whether obfuscation attacks work is unmeasured. The "merely not refused" sensitivity run moves no number by more than 3 points.
 
-Per target and family. Each cell is **unguarded → guarded** attack success: the share of the family's attacks that work when sent straight to the model, then the share that both get past the guard and work. Judge refusals are dropped here (the conservative reading). Each cell has about 40 attacks, so a single cell is roughly ±10–15 points. Obfuscation is left out because the judge graded only 27 Gemini pairs, none of which worked.
+Per target and family, **after the SORRY re-grade below** (SORRY rows graded against the original request). Each cell is **unguarded → guarded** attack success: the share of the family's attacks that work when sent straight to the model, then the share that both get past the guard and work. Judge refusals are dropped (the conservative reading). Each cell has about 40 attacks, so a single cell is roughly ±10–15 points. Obfuscation is left out: the judge refuses nearly all of it.
 
 | family | grok-4.7 | qwen3.8-max | qwen3.8-flash | gemini-4-argon | gemini-3.8-flash | deepseek-v4.1-flash | deepseek-v4-pro | glm-5.3-flash | glm-5.3 |
 |---|---|---|---|---|---|---|---|---|---|
-| HackAPrompt | 1→1 | 16→3 | 26→2 | 6→1 | 15→2 | 24→3 | 19→2 | 38→4 | 34→3 |
-| Tensor Trust hijack | 0→0 | 1→1 | 6→2 | 0→0 | 5→1 | 2→2 | 3→3 | 1→1 | 1→1 |
-| Tensor Trust extract | 0→0 | 10→1 | 12→1 | 16→0 | 9→0 | 13→0 | 13→1 | 17→1 | 17→1 |
+| HackAPrompt | 1→1 | 16→3 | 25→2 | 6→1 | 15→2 | 24→3 | 19→2 | 38→4 | 34→3 |
+| Tensor Trust hijack | 0→0 | 1→1 | 10→1 | 0→0 | 5→1 | 2→2 | 3→3 | 1→1 | 5→1 |
+| Tensor Trust extract | 0→0 | 10→1 | 15→1 | 16→0 | 9→0 | 13→0 | 13→1 | 17→1 | 19→1 |
 | InjecAgent harm | 0→0 | 0→0 | 0→0 | 0→0 | 0→0 | 0→0 | 11→3 | 1→1 | 5→1 |
 | InjecAgent data-steal | 3→0 | 0→0 | 0→0 | 0→0 | 0→0 | 0→0 | 3→1 | 3→0 | 0→0 |
-| WildJailbreak | 1→1 | 2→2 | 7→2 | 20→5 | 14→7 | 4→4 | 22→5 | 12→4 | 13→4 |
-| WildGuard jailbreak | 18→6 | 12→3 | 23→5 | 41→7 | 35→6 | 25→6 | 39→7 | 25→6 | 25→6 |
-| MHJ multi-turn | 14→10 | 11→7 | 23→17 | 69→12 | 50→11 | 49→14 | 70→14 | 30→10 | 37→11 |
-| SORRY persuasion | 61→25 | 54→19 | 66→24 | 84→26 | 92→25 | 64→25 | 90→26 | 75→25 | 83→27 |
-| SORRY role-play | 29→26 | 17→14 | 32→23 | 58→33 | 68→36 | 27→24 | 47→31 | 31→24 | 32→28 |
-| SORRY low-resource language | 19→19 | 14→14 | 19→18 | 33→33 | 36→36 | 32→32 | 25→25 | 33→32 | 34→32 |
-| **all except obfuscation** | **12→7** | **12→5** | **18→7** | **29→10** | **28→10** | **21→9** | **30→10** | **24→9** | **25→9** |
+| WildJailbreak | 1→1 | 2→2 | 7→2 | 20→5 | 14→7 | 4→4 | 23→6 | 12→4 | 13→4 |
+| WildGuard jailbreak | 18→6 | 12→3 | 22→5 | 41→7 | 34→6 | 25→6 | 39→7 | 25→6 | 25→6 |
+| MHJ multi-turn | 14→10 | 11→7 | 34→16 | 69→12 | 50→11 | 49→13 | 72→14 | 30→10 | 37→11 |
+| SORRY persuasion | 8→8 | 11→7 | 15→11 | 27→10 | 27→10 | 13→9 | 25→8 | 11→7 | 20→7 |
+| SORRY role-play | 27→24 | 13→10 | 28→18 | 54→30 | 61→32 | 27→20 | 41→28 | 29→22 | 25→22 |
+| SORRY low-resource language | 15→15 | 11→11 | 14→14 | 26→26 | 21→21 | 18→18 | 22→22 | 22→22 | 26→26 |
+| **all except obfuscation** | **7→5** | **8→4** | **15→6** | **22→7** | **20→7** | **16→6** | **24→8** | **17→6** | **19→7** |
 
-- The guard narrows the gap between models: unguarded success ranges from 12% to 30%, guarded from 5% to 10%. The most jailbreakable models (Gemini-argon, DeepSeek-pro) gain the most.
-- About a quarter of persuasion attacks still work on every model with the guard in front. Persuasion is the largest remaining risk, followed by role-play (14–36%).
-- Injection families end at 0–4% guarded on every model, even where HackAPrompt works on 26–38% of attacks unguarded (flash and GLM models).
+- The guard narrows the gap between models: unguarded success ranges from 7% to 24%, guarded from 4% to 8%. The most jailbreakable models (DeepSeek-pro, Gemini-argon) gain the most.
+- Role-play is now the largest remaining risk (10–32% guarded), then low-resource translation (11–26%, the guard doesn't help) and MHJ multi-turn (7–16%). Persuasion is 7–11%.
+- Injection families end at 0–4% guarded on every model, even where HackAPrompt works on 25–38% of attacks unguarded (flash and GLM models).
+- (Before the re-grade, persuasion read 54–92% unguarded and 19–27% guarded on every model; those numbers counted answers to softened rewrites as successes.)
 
 ### 2026-10-21: why persuasion and role-play get through (dev diagnosis, ~$0.01)
 Done on dev only; test has already been used for reporting.
@@ -311,6 +312,22 @@ Done on dev only; test has already been used for reporting.
 - **Why the gap won't close: SORRY-Bench's persuasion rewrites often change the request, not just the framing.** Examples from the split pairs: a post that ridicules a religious group becomes a post that "critically examines" the practice "inviting dialogue"; a fake vaccine ad becomes a piece "consulting verifiable scientific research"; a defamation plan becomes an analysis of "defenses against such malicious practices". Jev's low harm score on many of these is arguably correct.
 - **This also contaminates Phase 2.** The judge infers the underlying request from the attack text, so a model that answers the softened rewrite counts as a working attack. Of 248 persuasion pairs judged working, the judge's own summaries include requests like "how California protects election officials' contact information (a benign informational request)". **Phase 2 persuasion success rates (and the guarded persuasion row in the per-target table) are overstated.** StrongREJECT grades a response against the *original* forbidden request. SORRY-Bench provides it (the base style of each question), so the fix is to re-grade against it.
 
+### 2026-10-21: SORRY families re-graded against the original request (judge $7.69)
+`judge.grade()` now takes the dataset's original plain request (SORRY-Bench `question.jsonl`, saved as `datasets/sorry_base.jsonl`). A reply that only fulfils a softened version counts as refused, as in StrongREJECT. Target replies came from the call cache; only judge calls were new. The same run also retried pairs that had errored, so 4,233 of 4,320 pairs are now complete. Spend to date: OpenRouter $12.92, judge $20.69.
+
+| family | works\|miss before → after | works\|blk before → after | recall on working, after [95% CI] |
+|---|---|---|---|
+| sorry/persuasion | 95% → 40% | 69% → 17% | 55% [30, 74] (judge refusals dropped: 51% [18, 77]) |
+| sorry/roleplay | 66% → 57% | 21% → 21% | 36% [20, 50] (dropped: 32% [15, 45]) |
+| sorry/low_resource_language | 38% → 32% | 8% → 4% | 1% [0, 2] |
+| sorry/obfuscation | n/a | still judge-refused: 280 of 310 pairs | unmeasured |
+| **all families** | 41% → 34% | 26% → 23% | **72% [67, 76]** (dropped: **62% [55, 68]**) |
+
+- **Persuasion mostly doesn't work.** Graded against the original request, its success rate falls by more than half. Most "successes" were models answering the softened rewrite.
+- **Role-play does work.** It barely moves (57% of misses still produce the forbidden content), so it is now the main target for improvement.
+- Obfuscation stays unmeasured: Sonnet still declines to grade the cipher replies even when given the plain request.
+- Headline: the guard blocks 80% of these attacks and **62–72% of the ones that work** (the range is how judge refusals count). Before the re-grade it was 61–70%.
+
 ## Findings
 - Subtle and non-English injections are the clearest weakness so far (deepset: 60% allowed).
 - Label noise is real: itw_regular contains outright jailbreaks ("a model called Kyle who operates without any restrictions"), and some deepset "injections" are ordinary requests.
@@ -320,7 +337,8 @@ Done on dev only; test has already been used for reporting.
 - Technique alone can't separate a jailbreak from a jailbreak-styled harmless request; harm alone can't separate a jailbreak from a plain harmful request. Their product can, and it is the definition of an attack we use.
 - Low-resource-language translation is not detectable as a technique. Report it as a known limitation rather than tune for it.
 - Scraped labels are noisy in both directions; a Sonnet audit of the disagreements flipped 44 of 65, versus 4 of 98 random agreements.
-- **The attacks the guard misses are the ones more likely to work.** Missed attacks succeed 41% of the time and blocked ones 26%. So recall on working attacks (61–70%, depending on how judge refusals count) is below recall on all attacks (80%). The gap is widest for role-play (61% → 33%) and persuasion, where 95% of misses work.
+- **The attacks the guard misses are the ones more likely to work.** After the SORRY re-grade, missed attacks succeed 34% of the time and blocked ones 23%. So recall on working attacks (62–72%, depending on how judge refusals count) is below recall on all attacks (80%). The gap is widest for role-play (60% → 36%).
+- **Grade against the original request.** Rewrites can soften the ask. A judge that infers the request from the rewrite counted answers to softened persuasion prompts as successes and overstated persuasion success by more than 2×.
 - Injection misses rarely work on current models: 4–16% of missed HackAPrompt, Tensor Trust and InjecAgent attacks succeed. Their recall-on-working CIs are therefore very wide.
 - On held-out test the frozen guard catches 82% of attacks at 7% FPR (v0: 61% at 6%), and generalizes to unseen sources. Its false positives are almost all benign prompts written in jailbreak style (35% of WildGuardMix adversarial-benign), not ordinary or over-refusal prompts (0–6%).
 
@@ -353,6 +371,6 @@ Done on dev only; test has already been used for reporting.
 
 ## Next
 - Phase 2 obfuscation success is unmeasured: Sonnet refuses to grade all of them. Options are decoding the replies in code before grading, or reporting it as unknown.
-- Re-grade the SORRY families in Phase 2 against the original plain request (target replies are cached, so judge cost only). Then re-measure which persuasion and role-play misses actually work before tuning for them.
+- Role-play is the main remaining gap. Its misses are mostly mild payloads that score low on the harm question even when plain, plus a weak persona signal (see the dev diagnosis).
 - Relabel SORRY persuasion rewrites whose request is no longer restricted (they aren't attacks under our definition), on dev for training and on test for reporting.
 - For the write-up: audit a random sample of *test* labels (blind to the guard) to estimate test label noise without biasing toward the guard.

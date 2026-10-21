@@ -40,12 +40,11 @@ import numpy as np
 
 import anti_venom
 import hillclimb as h
-from corpus import POOL, SOURCES, raw_rows, sample
+from corpus import POOL, SOURCES, jsonl, raw_rows, sample
 
 DATA = Path(__file__).with_name("data")
 CACHE, OUT = DATA / "replay.jsonl", DATA / "replay_results.json"
 CALLS, JUDGED = DATA / "replay_calls.jsonl", DATA / "replay_judged.jsonl"  # every successful API call, full reply
-SORRY_BASE = Path(__file__).with_name("datasets") / "sorry_base.jsonl"
 TOOLS_JSON = Path(__file__).with_name("datasets") / "injecagent_tools.json"
 OR_URL = "https://openrouter.ai/api/v1/chat/completions"
 # Reasoning models otherwise spend the whole budget thinking and return nothing; this changes how they behave, so it's part of the cache key.
@@ -164,7 +163,8 @@ def spec(item: dict, row: dict | None) -> dict:
 @functools.cache
 def sorry_base() -> dict:
     """question_id -> SORRY-Bench's plain base request (datasets/sorry_base.jsonl, the dataset's question.jsonl)."""
-    return {str(r["question_id"]): r["turns"][0] for r in map(json.loads, SORRY_BASE.read_text().splitlines())}
+    url = "https://huggingface.co/datasets/sorry-bench/sorry-bench-202406/resolve/main/question.jsonl"
+    return {str(r["question_id"]): r["turns"][0] for r in raw_rows("sorry_base", lambda: jsonl(url))}
 
 
 def succeeded(sp: dict, content: str, tool_calls: list[str]) -> bool:
