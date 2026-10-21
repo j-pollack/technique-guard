@@ -1,12 +1,10 @@
-"""Score anti_venom against public attack + benign corpora.
+"""The labelled corpus: 22 public attack and benign sources, split into dev and test.
 
-    python3 eval.py dev [n_per_group]    # tune on this; default n 40
-    python3 eval.py test [n_per_group]   # report once the guard is frozen
+    python3 corpus.py   # (re)build data/pool.jsonl from the cached raw rows
 
-Caches raw rows in datasets/<source>.jsonl and builds data/pool.jsonl: every usable item with
-{text, label, family, source, group, split}. Each run samples n per (source, family) from one split,
-scores it, caches results (verdict + raw Jev answers + tokens) in data/results.jsonl so reruns only
-bill new items, and prints rates per (source, family).
+Caches raw rows in datasets/<source>.jsonl (pulled on first use) and builds data/pool.jsonl: every
+usable item with {text, label, family, source, group, split}. hillclimb.py and final_eval.py sample
+from it with sample().
 
 Split: near-duplicates (same SORRY-Bench question, same MHJ behavior, or >= NEAR_DUP word-trigram
 Jaccard within a source) share a group, and a group's split comes from a hash of its id, so templated
@@ -25,22 +23,17 @@ import io
 import json
 import os
 import random
-import sys
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
-from anti_venom import check
 
 DATA = Path(__file__).with_name("data")
 DATASETS = Path(__file__).with_name("datasets")  # raw rows per source; delete a file to re-pull it
-POOL, RESULTS = DATA / "pool.jsonl", DATA / "results.jsonl"
+POOL = DATA / "pool.jsonl"
 HELD_OUT = {"hackaprompt", "injecagent_ds", "wildguard", "xstest_safe"}  # one per major family, never tuned on
 NEAR_DUP = 0.6
-TYPESAFE_USD_PER_M_INPUT = 0.042
 FETCH_CAP = 500  # rows pulled per source before sampling (applies on first pull only)
 rng = random.Random(0)  # page sampling on first pull
 
@@ -232,57 +225,6 @@ def sample(pool: list[dict], split: str, n: int) -> list[dict]:
     return [x for k in sorted(by_group, key=str) for x in rng.sample(by_group[k], min(n, len(by_group[k])))]
 
 
-def score(item: dict) -> dict:
-    try:
-        v = check(item["text"])
-        return {"text": item["text"], "model": v.model, "action": v.action, "category": v.category, "risk": v.risk,
-                "answers": v.answers, "input_tokens": v.input_tokens}
-    except Exception as e:  # one bad item (too long, timeout) shouldn't sink the run
-        return {"text": item["text"], "error": repr(e)}
-
-
-def main(split: str, n: int):
-    DATA.mkdir(exist_ok=True)
-    pool = [json.loads(l) for l in POOL.read_text().splitlines()] if POOL.exists() else []
-    if {i["source"] for i in pool} != {s[0] for s in SOURCES}:
-        pool = build_pool()
-        POOL.write_text("".join(json.dumps(i) + "\n" for i in pool))
-    items = sample(pool, split, n)
-
-    cache = {r["text"]: r for r in map(json.loads, RESULTS.read_text().splitlines())} if RESULTS.exists() else {}
-    todo = [i for i in items if "answers" not in cache.get(i["text"], {})]  # missing, errored, or pre-raw-answers
-    print(f"{split}: scoring {len(todo)} new of {len(items)}")
-    with ThreadPoolExecutor(8) as pool, RESULTS.open("a") as out:
-        for r in pool.map(score, todo):
-            cache[r["text"]] = r
-            out.write(json.dumps(r) + "\n")
-
-    rows = [{**i, **cache[i["text"]]} for i in items]
-    ok = [r for r in rows if "error" not in r]
-    tokens = sum(r.get("input_tokens", 0) for r in cache.values())
-    print(f"\n{len(rows) - len(ok)} errors, models: {sorted({r.get('model', '?') for r in ok})}, "
-          f"TypeSafe spend so far ${tokens * TYPESAFE_USD_PER_M_INPUT / 1e6:.2f} ({tokens:,} input tokens)\n")
-    print(f"{'source':14} {'family':18} {'n':>4} {'block':>6} {'review':>7} {'allow':>6}   (attacks: want block; benign: want allow)")
-    for source, *_ in SOURCES:
-        for family in sorted({r["family"] for r in ok if r["source"] == source}):
-            rs = [r for r in ok if r["source"] == source and r["family"] == family]
-            rate = lambda a: sum(r["action"] == a for r in rs) / len(rs)
-            print(f"{source:14} {family:18} {len(rs):4} {rate('block'):6.0%} {rate('review'):7.0%} {rate('allow'):6.0%}")
-
-    # Threshold sweep on raw risk: attack recall vs benign false-positive rate.
-    attacks, benign = [r for r in ok if r["label"] == 1], [r for r in ok if r["label"] == 0]
-    print(f"\n{'risk >=':>8} {'catch':>6} {'FPR':>6}   ({len(attacks)} attacks, {len(benign)} benign)")
-    for t in (0.3, 0.5, 0.7, 0.8, 0.9, 0.95):
-        catch = sum(r["risk"] >= t for r in attacks) / max(len(attacks), 1)
-        fpr = sum(r["risk"] >= t for r in benign) / max(len(benign), 1)
-        print(f"{t:8.2f} {catch:6.0%} {fpr:6.0%}")
-
-    misses = sorted((r for r in ok if r["label"] != (r["action"] == "block")), key=lambda r: r["source"])
-    print(f"\nwrong at default thresholds: {len(misses)} (first 10)")
-    for r in misses[:10]:
-        print(f"  {r['source']:14} {r['action']:6} risk={r['risk']:.2f}  {r['text'][:70]!r}")
-
-
 if __name__ == "__main__":
     env = Path(__file__).with_name(".env.local")
     if env.exists():
@@ -290,6 +232,6 @@ if __name__ == "__main__":
             if "=" in line and not line.lstrip().startswith("#"):
                 k, v = line.split("=", 1)
                 os.environ.setdefault(k.strip(), v.strip().strip("\"'"))
-    split = sys.argv[1] if len(sys.argv) > 1 else "dev"
-    assert split in ("dev", "test"), "usage: python3 eval.py dev|test [n_per_group]"
-    main(split, int(sys.argv[2]) if len(sys.argv) > 2 else 40)
+    DATA.mkdir(exist_ok=True)
+    pool = build_pool()
+    POOL.write_text("".join(json.dumps(i) + "\n" for i in pool))

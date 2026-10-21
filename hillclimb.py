@@ -22,10 +22,10 @@ from pathlib import Path
 import numpy as np
 
 import anti_venom
-from questions import HARM, INTERACT, LIBRARY
+from questions import HARM, INTERACT, LIBRARY, NO_MAIN, v0_risk
 
 DATA = Path(__file__).with_name("data")
-ANSWERS, LOG = DATA / "answers.jsonl", DATA / "hillclimb.jsonl"
+ANSWERS, LOG, AUDIT = DATA / "answers.jsonl", DATA / "hillclimb.jsonl", DATA / "label_audit.jsonl"
 BUDGETS = (0.02, 0.05, 0.10)
 BATCH = 40  # questions per Jev call
 USD_PER_M = 0.042
@@ -41,7 +41,7 @@ def qkey(q: dict) -> str:
 
 
 def dev_sample(n: int) -> list[dict]:
-    from eval import POOL, sample
+    from corpus import POOL, sample
     pool = [json.loads(l) for l in POOL.read_text().splitlines()]
     return sample(pool, "dev", n)
 
@@ -56,22 +56,22 @@ def ask_with_retry(text: str, questions: dict) -> dict:
             time.sleep(2 ** attempt)
 
 
-def fill(items: list[dict]) -> dict:
+def fill(items: list[dict], questions: dict = LIBRARY) -> dict:
     cache = {}
     if ANSWERS.exists():
         for r in map(json.loads, ANSWERS.read_text().splitlines()):
             cache[(r["t"], r["q"])] = r["a"]
-    keys = {name: qkey(q) for name, q in LIBRARY.items()}
+    keys = {name: qkey(q) for name, q in questions.items()}
     jobs = []
     for item in items:
         t = sha(item["text"])
-        missing = [n for n in LIBRARY if (t, keys[n]) not in cache]
+        missing = [n for n in questions if (t, keys[n]) not in cache]
         jobs += [(item["text"], t, missing[i:i + BATCH]) for i in range(0, len(missing), BATCH)]
-    print(f"{len(items)} dev items x {len(LIBRARY)} questions; {len(jobs)} Jev calls needed")
+    print(f"{len(items)} items x {len(questions)} questions; {len(jobs)} Jev calls needed")
 
     def run(job):
         text, t, names = job
-        return t, names, ask_with_retry(text, {n: LIBRARY[n] for n in names})
+        return t, names, ask_with_retry(text, {n: questions[n] for n in names})
 
     tokens, errors, models = 0, 0, set()
     with ThreadPoolExecutor(8) as pool, ANSWERS.open("a") as out:
@@ -87,28 +87,14 @@ def fill(items: list[dict]) -> dict:
     if jobs:
         print(f"  {errors} failed calls, served by {sorted(models)}, ${tokens * USD_PER_M / 1e6:.3f} this round")
     assert models <= {anti_venom.MODEL}, f"unexpected model {models}"
-    return {(i["text"], n): cache.get((sha(i["text"]), keys[n])) for i in items for n in LIBRARY}
+    return {(i["text"], n): cache.get((sha(i["text"]), keys[n])) for i in items for n in questions}
 
 
-def feature_names() -> list[str]:
-    names = []
-    for n, q in LIBRARY.items():
-        if q["type"] == "noul":
-            names.append(n)
-        elif q["type"] == "choice":
-            names += [f"{n}={o}" for o in q["criteria"]]
-    return names + [f"{n}*{HARM}" for n in INTERACT]
-
-
-def row(answers: dict, text: str) -> list[float] | None:
-    x = []
-    for n, q in LIBRARY.items():
-        a = answers[(text, n)]
-        if a is None:
-            return None
-        x += [a["noul"]] if q["type"] == "noul" else [a["probabilities"][o] for o in q["criteria"]]
-    harm = answers[(text, HARM)]["noul"]
-    return x + [answers[(text, n)]["noul"] * harm for n in INTERACT]
+def row(answers: dict, text: str) -> tuple[list[str], list[float]] | None:
+    by_name = {n: answers[(text, n)] for n in LIBRARY}
+    if any(a is None for a in by_name.values()):
+        return None
+    return anti_venom.featurize(by_name, LIBRARY, HARM, INTERACT, NO_MAIN)
 
 
 def fit(X: np.ndarray, y: np.ndarray, steps: int = 3000, lr: float = 1.0, l2: float = 1e-3) -> np.ndarray:
@@ -146,24 +132,39 @@ def auc(s: np.ndarray, y: np.ndarray) -> float:
     return (ranks[pos].sum() - pos.sum() * (pos.sum() + 1) / 2) / (pos.sum() * (~pos).sum())
 
 
-def main(n: int):
+def load(n: int):
+    """The dev sample as (items, X, y, y_orig, names, folds); y uses Sonnet-audited labels where present."""
     items = dev_sample(n)
     answers = fill(items)
     rows = [(i, row(answers, i["text"])) for i in items]
-    rows = [(i, x) for i, x in rows if x is not None]
+    rows = [(i, r) for i, r in rows if r is not None]
     items = [i for i, _ in rows]
-    X = np.array([x for _, x in rows])
-    y = np.array([i["label"] for i in items])
+    names = rows[0][1][0]
+    X = np.array([r[1] for _, r in rows])
+    y_orig = np.array([i["label"] for i in items])
+    audited = {}
+    if AUDIT.exists():
+        for r in map(json.loads, AUDIT.read_text().splitlines()):
+            if "sonnet" in r:
+                audited[r["text"]] = int(r["sonnet"] != "not_attack")
+    y = np.array([audited.get(i["text"], i["label"]) for i in items])
     folds = np.array([int(hashlib.sha256(i["group"].encode()).hexdigest(), 16) % 5 for i in items])
-    names = feature_names()
+    return items, X, y, y_orig, names, folds, answers
+
+
+def main(n: int):
+    items, X, y, y_orig, names, folds, answers = load(n)
+    print(f"{len(items)} usable ({int(y.sum())} attacks, {int((y == 0).sum())} negatives), {len(names)} features, "
+          f"{int((y != y_orig).sum())} labels changed by audit\n")
     v0 = [j for j, nm in enumerate(names) if nm.startswith("v0_") and "*" not in nm]
-    print(f"{len(items)} usable ({int(y.sum())} attacks, {int((y == 0).sum())} negatives), {len(names)} features\n")
 
     v0_answers = lambda i: {n[3:]: answers[(i["text"], n)] for n in LIBRARY if n.startswith("v0_")}
     systems = {
-        "v0 max": np.array([anti_venom.judge(v0_answers(i)).risk for i in items]),
+        "v0 max": np.array([v0_risk(v0_answers(i)) for i in items]),
         "v0 logit": cv_scores(X[:, v0], y, folds),
         "library logit": cv_scores(X, y, folds),
+        # Variant: jailbreak techniques only count when the underlying request is restricted.
+        "lib, jb×harm only": cv_scores(X[:, [j for j, nm in enumerate(names) if nm not in INTERACT]], y, folds),
     }
     thresholds = {s: {b: threshold_at(sc, y, b) for b in BUDGETS} for s, sc in systems.items()}
 
@@ -174,6 +175,11 @@ def main(n: int):
         summary[f"catch@{b:.0%}"] = catches
         print(f"{b:<14.0%}" + "".join(f"{c:15.0%}" for c in catches.values()))
     print(f"{'AUC':14}" + "".join(f"{auc(sc, y):15.3f}" for sc in systems.values()))
+    orig = cv_scores(X, y_orig, folds)
+    summary["library logit, original labels"] = {
+        f"{b:.0%}": float((orig[y_orig == 1] > threshold_at(orig, y_orig, b)).mean()) for b in BUDGETS}
+    print("library logit on original (unaudited) labels: " +
+          ", ".join(f"{k} FPR → {v:.0%}" for k, v in summary["library logit, original labels"].items()))
 
     print(f"\nper family at 5% FPR (attacks: catch; negatives: FPR)")
     print(f"{'source':14} {'family':18} {'n':>4}" + "".join(f"{s:>15}" for s in systems))
