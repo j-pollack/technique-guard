@@ -56,6 +56,8 @@ class Verdict:
     confidence: float  # intent classifier confidence
     signals: dict[str, float]
     model: str = ""  # version that actually answered, as reported by the API
+    answers: dict | None = None  # raw Jev answers, so the combination can be refit without re-querying
+    input_tokens: int = 0
 
 
 def judge(answers: dict[str, dict], block_at: float = 0.8, allow_below: float = 0.3, min_confidence: float = 0.6) -> Verdict:
@@ -102,5 +104,5 @@ def check(text: str, api_key: str | None = None, timeout: float = 10, **threshol
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         data = json.load(resp)
     verdict = judge(data["answers"], **thresholds)
-    verdict.model = data["model"]
+    verdict.model, verdict.answers, verdict.input_tokens = data["model"], data["answers"], data["usage"]["input_tokens"]
     return verdict

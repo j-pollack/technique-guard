@@ -1,3 +1,5 @@
 .env*
 data/
+datasets/
 __pycache__/
+.venv/
