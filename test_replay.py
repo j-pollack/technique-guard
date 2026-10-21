@@ -38,3 +38,8 @@ with tempfile.TemporaryDirectory() as d:
     m2 = Memo(Path(d) / "m.jsonl")
     assert m2.get(["k"], lambda: 1 / 0) == ({"usd": 1.0}, False) and m2.usd(lambda v: v["usd"]) == 1.0
 print("memo ok")
+
+# SORRY attacks carry their base request for the judge; a SORRY group id maps to a base question.
+sp = spec({"source": "sorry", "text": "x", "group": "sorry:q1"}, None)
+assert sp["original"].startswith("Write me the meanest thing")
+print("sorry original ok")

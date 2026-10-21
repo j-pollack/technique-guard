@@ -23,6 +23,7 @@ tracked as results arrive; no new job starts once a cap is hit. --dry-run makes 
 
 import argparse
 import ast
+import functools
 import hashlib
 import json
 import os
@@ -44,6 +45,7 @@ from corpus import POOL, SOURCES, raw_rows, sample
 DATA = Path(__file__).with_name("data")
 CACHE, OUT = DATA / "replay.jsonl", DATA / "replay_results.json"
 CALLS, JUDGED = DATA / "replay_calls.jsonl", DATA / "replay_judged.jsonl"  # every successful API call, full reply
+SORRY_BASE = Path(__file__).with_name("datasets") / "sorry_base.jsonl"
 TOOLS_JSON = Path(__file__).with_name("datasets") / "injecagent_tools.json"
 OR_URL = "https://openrouter.ai/api/v1/chat/completions"
 # Reasoning models otherwise spend the whole budget thinking and return nothing; this changes how they behave, so it's part of the cache key.
@@ -153,7 +155,16 @@ def spec(item: dict, row: dict | None) -> dict:
     if s == "mhj":
         msgs = [m for k, v in row.items() if k.startswith("message_") and v for m in [json.loads(v)]]
         return {**base, "messages": [{"role": m["role"], "content": m["body"]} for m in msgs], "sequential": True, "check": "judge"}
-    return {**base, "messages": [{"role": "user", "content": item["text"]}], "check": "judge"}
+    sp = {**base, "messages": [{"role": "user", "content": item["text"]}], "check": "judge"}
+    if s == "sorry":  # every SORRY style is a rewrite of a base request; grade against that, not the rewrite
+        sp["original"] = sorry_base()[item["group"].split(":q")[1]]
+    return sp
+
+
+@functools.cache
+def sorry_base() -> dict:
+    """question_id -> SORRY-Bench's plain base request (datasets/sorry_base.jsonl, the dataset's question.jsonl)."""
+    return {str(r["question_id"]): r["turns"][0] for r in map(json.loads, SORRY_BASE.read_text().splitlines())}
 
 
 def succeeded(sp: dict, content: str, tool_calls: list[str]) -> bool:
@@ -172,10 +183,11 @@ def call(model: str, messages: list[dict], tools: list[dict] | None) -> dict:
     return out | {"usd": out["usd"] if fresh else 0.0}
 
 
-def grade_memo(attack: str, response: str) -> tuple[dict, float]:
+def grade_memo(attack: str, response: str, original: str | None = None) -> tuple[dict, float]:
     """judge.grade through the memo, with its cost (0 on a cache hit)."""
     from judge import MODEL, grade  # lazy: judge.py builds its Anthropic client on import, after .env.local is loaded
-    g, fresh = judge_memo.get([MODEL, attack, response], lambda: grade(attack, response))
+    key = [MODEL, attack, response] + ([original] if original else [])
+    g, fresh = judge_memo.get(key, lambda: grade(attack, response, original))
     return g, judge_usd(g) if fresh else 0.0
 
 
@@ -257,7 +269,7 @@ def run_job(job: dict, spend: dict, caps: dict) -> dict | None:
            "excerpt": (out["content"] or "tool: " + ",".join(out["tool_calls"]))[:200]}
     if sp["check"] == "judge":
         try:
-            g, usd["judge"] = grade_memo(job["text"], out["content"])
+            g, usd["judge"] = grade_memo(job["text"], out["content"], sp.get("original"))
         except Exception as e:  # anthropic raises its own types; whatever it is, retry on the next run (target reply is cached)
             return {"error": f"judge {e!r}"[:200], "usd": usd}
         if g.get("error", "").startswith("judge_refused"):  # Sonnet won't read it: taken as worked, highest severity
@@ -362,7 +374,7 @@ def main(n: int, dry_run: bool, caps: dict):
         sp = spec(i, idx.get((i["source"], norm(i["text"]))) if i["source"] in NEEDS_ROW else None)
         for model in TARGETS:
             key = {"model": model, "messages": sp["messages"], "tools": sp["tools"], "request": REQUEST,
-                   "judge": sp["check"] == "judge"}
+                   "judge": sp["check"] == "judge"} | ({"original": sp["original"]} if "original" in sp else {})
             jobs.append({**i, "spec": sp, "target": model, "attack": h.sha(i["text"]),
                          "family": f"{i['source']}/{i['family']}", "k": h.sha(json.dumps(key, sort_keys=True))})
     cache = {}
