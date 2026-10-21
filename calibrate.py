@@ -58,7 +58,7 @@ def main():
     rows = []
     for r in map(json.loads, (DATA / "results.jsonl").read_text().splitlines()):
         item = pool.get(r["text"])
-        if item and item["split"] == "dev" and item["label"] is not None and "answers" in r:
+        if item and item["split"] == "dev" and "answers" in r:
             rows.append({**item, **r, "x": features(r["answers"])})
     rows = list({r["text"]: r for r in rows}.values())
     fold = lambda r: int(hashlib.sha256(r["group"].encode()).hexdigest(), 16) % 5
@@ -81,7 +81,7 @@ def main():
 
     t, _ = catch_at_fpr([(r["lr"], r["label"]) for r in rows], 0.05)
     tb, _ = catch_at_fpr([(r["risk"], r["label"]) for r in rows], 0.05)
-    print(f"\nper family at 5% FPR (catch for attacks, FPR for benign):")
+    print(f"\nper family at 5% FPR (catch for attacks, FPR for benign and harmful_plain):")
     print(f"{'source':14} {'family':18} {'n':>4} {'max':>6} {'logit':>6}")
     for key in sorted({(r["source"], r["family"]) for r in rows}):
         rs = [r for r in rows if (r["source"], r["family"]) == key]

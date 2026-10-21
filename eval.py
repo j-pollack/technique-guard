@@ -14,9 +14,9 @@ attacks can't straddle dev and test. HELD_OUT sources are test-only, to measure 
 Gated sets (wildjailbreak, hackaprompt, wildguardmix, mhj, walledai/*, sorry-bench) need HF_TOKEN
 and their terms accepted on HF.
 
-label 1 = attack on the downstream LLM (want block), 0 = benign (want allow), None = plain harmful
-request: not an attack, so it's reported on its own and left out of catch/FPR. How often the guard
-blocks those shows whether it's acting as a harm filter.
+label 1 = attack on the downstream LLM (want block), 0 = not an attack (want allow). Plain harmful
+requests (family "harmful_plain") are 0: refusing them is the downstream model's job, and the guard
+must not learn harmfulness as a stand-in for "attack".
 """
 
 import csv
@@ -94,7 +94,7 @@ def wildguard(r: dict):
     harmful = r["prompt_harm_label"] == "harmful"
     if r["adversarial"]:
         return (r["prompt"], 1, "jailbreak") if harmful else (r["prompt"], 0, "benign")
-    return (r["prompt"], None, "harmful_plain") if harmful else (r["prompt"], 0, "benign")
+    return (r["prompt"], 0, "harmful_plain") if harmful else (r["prompt"], 0, "benign")
 
 
 # SORRY-Bench rewrites each harmful request in 20 styles. Encodings, low-resource translation,
@@ -109,7 +109,7 @@ SORRY_FAMILY = {
 
 def sorry(r: dict):
     family = SORRY_FAMILY.get(r["prompt_style"])
-    return (r["turns"][0], 1, family) if family else (r["turns"][0], None, "harmful_plain")
+    return (r["turns"][0], 1, family) if family else (r["turns"][0], 0, "harmful_plain")
 
 
 TT = "https://huggingface.co/datasets/qxcv/tensor-trust/resolve/main/benchmarks"
@@ -150,9 +150,9 @@ SOURCES = [
     ("mhj", lambda: csv_rows("https://huggingface.co/datasets/ScaleAI/mhj/resolve/main/harmbench_behaviors.csv"),
      lambda r: (mhj_transcript(r), 1, "multi_turn")),
     # Plain harmful requests (payloads without a jailbreak wrapper).
-    ("harmbench", lambda: hf("walledai/HarmBench", "standard", "train"), lambda r: (r["prompt"], None, "harmful_plain")),
-    ("advbench", lambda: hf("walledai/AdvBench", "default", "train", cap=600), lambda r: (r["prompt"], None, "harmful_plain")),
-    ("strongreject", lambda: hf("walledai/StrongREJECT", "default", "train"), lambda r: (r["prompt"], None, "harmful_plain")),
+    ("harmbench", lambda: hf("walledai/HarmBench", "standard", "train"), lambda r: (r["prompt"], 0, "harmful_plain")),
+    ("advbench", lambda: hf("walledai/AdvBench", "default", "train", cap=600), lambda r: (r["prompt"], 0, "harmful_plain")),
+    ("strongreject", lambda: hf("walledai/StrongREJECT", "default", "train"), lambda r: (r["prompt"], 0, "harmful_plain")),
     ("xstest_safe", lambda: hf("Paul/XSTest", "default", "train"), lambda r: (r["prompt"], 0, "benign") if r["label"] == "safe" else None),
     ("orbench_hard", lambda: hf("bench-llm/or-bench", "or-bench-hard-1k", "train"), lambda r: (r["prompt"], 0, "benign")),
 ]
@@ -275,7 +275,7 @@ def main(split: str, n: int):
         fpr = sum(r["risk"] >= t for r in benign) / max(len(benign), 1)
         print(f"{t:8.2f} {catch:6.0%} {fpr:6.0%}")
 
-    misses = sorted((r for r in ok if r["label"] is not None and r["label"] != (r["action"] == "block")), key=lambda r: r["source"])
+    misses = sorted((r for r in ok if r["label"] != (r["action"] == "block")), key=lambda r: r["source"])
     print(f"\nwrong at default thresholds: {len(misses)} (first 10)")
     for r in misses[:10]:
         print(f"  {r['source']:14} {r['action']:6} risk={r['risk']:.2f}  {r['text'][:70]!r}")

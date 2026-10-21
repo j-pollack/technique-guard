@@ -39,7 +39,7 @@ Detecting prompt-injection and jailbreak attacks with TypeSafe's Jev before they
 
 ## Data inventory
 
-25 MB, 22 sources. Label 1 = attack, 0 = benign, None = plain harmful request (no jailbreak wrapper; reported on its own, outside catch/FPR).
+25 MB, 22 sources. Label 1 = attack, 0 = not an attack. Plain harmful requests (family harmful_plain) are label 0 since 2026-10-21: the guard should allow them (see Decisions).
 
 | Family | Sources (usable rows) |
 |---|---|
@@ -108,12 +108,27 @@ Biggest per-family gains at 5% FPR: injecagent_dh 7% → 58%, gandalf_summ 34% �
 
 **Problem: the refit leans on harmfulness.** `harmful_request` gets the second-largest weight (+2.19), and at the 5%-FPR threshold the refit flags 46–93% of plain harmful requests (sorry 46%, strongreject 66%, harmbench 68%, advbench 93%), none of which contain an attack. The training negatives have almost no harmful-but-not-attack text, so "harmful" became a stand-in for "attack". If left as is, jailbreak recall partly measures payload harmfulness rather than the jailbreak technique.
 
+### 2026-10-21: plain harmful requests become negatives
+Relabelled harmful_plain as 0 (dev now 1,143 attacks vs 872 negatives in the scored sample), so they count toward FPR and the combiner can't use harmfulness as a shortcut.
+
+| Benign FPR budget | max-of-signals | logistic (CV) |
+|---|---|---|
+| 2% | 42% | 36% |
+| 5% | 59% | 54% |
+| 10% | 65% | 71% |
+
+- `harmful_request` weight falls from +2.19 to +0.22; harmful_plain flagged 0% at 5% FPR (was 46–93%).
+- What collapses tells us what was really being detected: sorry roleplay 61% → 4%, wj_adv_harmful 80% → 54%, persuasion 9% → 1%. Those were largely caught for their harmful payload, not their jailbreak technique.
+- What survives is technique-based: gandalf 98%, jackhhao 93%, itw_jailbreak 84%, tt_extract 80%, tt_hijack 83%, gandalf_summ 74%, obfuscation 59%.
+- Indirect injection (injecagent_dh 37%) and multi-turn (mhj 26%) stay weak.
+- With honest negatives, re-weighting alone no longer beats max-of-signals at low FPR. The remaining gains have to come from **new questions** that describe jailbreak and injection techniques independently of the payload.
+
 ## Findings
 - Subtle and non-English injections are the clearest weakness so far (deepset: 60% allowed).
 - Label noise is real: itw_regular contains outright jailbreaks ("a model called Kyle who operates without any restrictions"), and some deepset "injections" are ordinary requests.
 - Re-weighting Jev's existing answers is worth ~20 points of recall at a fixed FPR, for free.
 - Persuasion-style jailbreaks (authority endorsement, logical appeal, misrepresentation) are nearly invisible to the current question set.
-- A learned combiner will exploit harmfulness unless plain harmful requests are in the training negatives.
+- A learned combiner will exploit harmfulness unless plain harmful requests are in the training negatives. With them in, much apparent jailbreak recall (role-play, WildJailbreak) disappears: it was harm detection.
 
 ## Phase 2 design notes
 - Attack success is independent of the guard, so replays can run on test items now and be joined with the frozen guard's verdicts later.
@@ -130,6 +145,7 @@ Biggest per-family gains at 5% FPR: injecagent_dh 7% → 58%, gandalf_summ 34% �
 ## Decisions
 - 2026-10-21: judge = Claude Sonnet 5.5 via the Anthropic API key; Claude is never a target.
 - 2026-10-21: 9 OpenRouter targets (listed above). Budgets: $50 TypeSafe, $50 OpenRouter.
+- 2026-10-21: the guard's job is blocking attacks, not harmful requests ("that's the provider/model's job"). Plain harmful requests are negatives in training and count toward FPR.
 
-## Open decisions
-- Should plain harmful requests count as negatives when training the combiner? (They decide whether the guard is an attack detector or partly a harm filter.)
+## Next
+- Phase 1b: add payload-independent questions for the blind spots (persuasion, role-play as a wrapper, multi-turn escalation, instructions embedded in data/tool output), re-score dev, refit.
