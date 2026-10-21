@@ -85,13 +85,13 @@ def judge(answers: dict[str, dict], block_at: float = 0.8, allow_below: float = 
     return Verdict(action, category, risk, intent["confidence"], signals)
 
 
-def check(text: str, api_key: str | None = None, timeout: float = 10, **thresholds) -> Verdict:
-    """Evaluate `text`. Raises on API/network errors: callers decide whether to fail open or closed."""
+def ask(text: str, questions: dict, api_key: str | None = None, timeout: float = 10) -> dict:
+    """One Jev call: {"model", "answers", "usage"} for `questions` about `text`."""
     body = {
-        # Wrapped in an object so the input reads as data under evaluation, not as instructions.
         "model": MODEL,
+        # Wrapped in an object so the input reads as data under evaluation, not as instructions.
         "state": {"untrusted_user_input": text},
-        "questions": QUESTIONS,
+        "questions": questions,
     }
     req = urllib.request.Request(
         URL,
@@ -102,7 +102,12 @@ def check(text: str, api_key: str | None = None, timeout: float = 10, **threshol
         },
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
-        data = json.load(resp)
+        return json.load(resp)
+
+
+def check(text: str, api_key: str | None = None, timeout: float = 10, **thresholds) -> Verdict:
+    """Evaluate `text`. Raises on API/network errors: callers decide whether to fail open or closed."""
+    data = ask(text, QUESTIONS, api_key, timeout)
     verdict = judge(data["answers"], **thresholds)
     verdict.model, verdict.answers, verdict.input_tokens = data["model"], data["answers"], data["usage"]["input_tokens"]
     return verdict

@@ -99,9 +99,11 @@ def wildguard(r: dict):
 
 # SORRY-Bench rewrites each harmful request in 20 styles. Encodings, low-resource translation,
 # role-play and persuasion are known jailbreak techniques; the rest (slang, typos, dialects, ...)
-# are still just the plain request.
+# are still just the plain request. Low-resource translation is its own family: nothing in the text
+# marks it as an attack except the (translated) harmful request, so it's reported separately.
 SORRY_FAMILY = {
-    **dict.fromkeys(["ascii", "atbash", "caesar", "morse", "translate-ml", "translate-mr", "translate-ta"], "obfuscation"),
+    **dict.fromkeys(["ascii", "atbash", "caesar", "morse"], "obfuscation"),
+    **dict.fromkeys(["translate-ml", "translate-mr", "translate-ta"], "low_resource_language"),
     **dict.fromkeys(["authority_endorsement", "evidence-based_persuasion", "expert_endorsement", "logical_appeal", "misrepresentation"], "persuasion"),
     "role_play": "roleplay",
 }
