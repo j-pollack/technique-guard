@@ -16,7 +16,7 @@ import os
 import sys
 import time
 import urllib.error
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import numpy as np
@@ -74,8 +74,10 @@ def fill(items: list[dict], questions: dict = LIBRARY) -> dict:
         return t, names, ask_with_retry(text, {n: questions[n] for n in names})
 
     tokens, errors, models = 0, 0, set()
-    with ThreadPoolExecutor(8) as pool, ANSWERS.open("a") as out:
-        for t, names, data in pool.map(run, jobs):
+    # Line-buffered and in completion order, so a crash loses at most the calls still in flight.
+    with ThreadPoolExecutor(8) as pool, ANSWERS.open("a", buffering=1) as out:
+        for f in as_completed([pool.submit(run, j) for j in jobs]):
+            t, names, data = f.result()
             if "error" in data:
                 errors += 1
                 continue

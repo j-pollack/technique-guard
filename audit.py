@@ -12,7 +12,7 @@ import hashlib
 import json
 import os
 import random
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import anthropic
@@ -87,8 +87,10 @@ def main():
                 pick.append((i, bool(disagrees)))
     print(f"auditing {len(pick)} items ({sum(d for _, d in pick)} disagreements)")
 
-    with ThreadPoolExecutor(6) as pool, AUDIT.open("a") as out:
-        for (i, disagrees), res in zip(pick, pool.map(lambda p: label(p[0]["text"]), pick)):
+    with ThreadPoolExecutor(6) as pool, AUDIT.open("a", buffering=1) as out:
+        futures = {pool.submit(label, i["text"]): (i, d) for i, d in pick}
+        for f in as_completed(futures):
+            (i, disagrees), res = futures[f], f.result()
             out.write(json.dumps({"text": i["text"], "source": i["source"], "label": i["label"],
                                   "guard_disagreed": disagrees, **res}) + "\n")
 
