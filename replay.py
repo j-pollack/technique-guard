@@ -101,7 +101,7 @@ class Memo:
         return sum(cost(v) for v in self.d.values())
 
 
-calls, judged = Memo(CALLS), Memo(JUDGED)
+call_memo, judge_memo = Memo(CALLS), Memo(JUDGED)
 
 BLOCK = re.compile(r"blocked|moderation|content[_ ]filter|content policy", re.I)
 
@@ -166,7 +166,7 @@ def succeeded(sp: dict, content: str, tool_calls: list[str]) -> bool:
 
 def call(model: str, messages: list[dict], tools: list[dict] | None) -> dict:
     """call_api through the memo; a cache hit costs 0 and a cached provider block raises again."""
-    out, fresh = calls.get([model, messages, tools, REQUEST], lambda: call_api(model, messages, tools))
+    out, fresh = call_memo.get([model, messages, tools, REQUEST], lambda: call_api(model, messages, tools))
     if "blocked" in out:
         raise Blocked(out["blocked"])
     return out | {"usd": out["usd"] if fresh else 0.0}
@@ -175,7 +175,7 @@ def call(model: str, messages: list[dict], tools: list[dict] | None) -> dict:
 def grade_memo(attack: str, response: str) -> tuple[dict, float]:
     """judge.grade through the memo, with its cost (0 on a cache hit)."""
     from judge import MODEL, grade  # lazy: judge.py builds its Anthropic client on import, after .env.local is loaded
-    g, fresh = judged.get([MODEL, attack, response], lambda: grade(attack, response))
+    g, fresh = judge_memo.get([MODEL, attack, response], lambda: grade(attack, response))
     return g, judge_usd(g) if fresh else 0.0
 
 
@@ -377,7 +377,7 @@ def main(n: int, dry_run: bool, caps: dict):
         # Caps are for the whole replay: cost is stored per cached row, so resuming doesn't reset the meter.
         # The memos hold every paid call; rows written before the memos existed carry their own cost.
         legacy = [r for r in cache.values() if not r.get("memo")]
-        spend = {"openrouter": calls.usd(lambda v: v.get("usd", 0.0)), "judge": judged.usd(judge_usd)}
+        spend = {"openrouter": call_memo.usd(lambda v: v.get("usd", 0.0)), "judge": judge_memo.usd(judge_usd)}
         spend = {k: spend[k] + sum(r.get("usd", {}).get(k, 0.0) for r in legacy) for k in caps}
         errors, skipped = {}, 0
         # Line-buffered and in completion order, so a crash loses at most the calls still in flight.
