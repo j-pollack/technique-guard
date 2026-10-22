@@ -1,6 +1,6 @@
 """The frozen guard on realistic chat traffic: false-positive rate, attack prevalence, and precision.
 
-    .venv/bin/python traffic.py [n]   # default 3000 first user turns from WildChat-1M
+    .venv/bin/python traffic.py [n] [source]   # default 3000 first user turns from wildchat (or lmsys)
 
 Real traffic contains real attacks, so the guard's blocks can't all be counted as false positives. Sonnet
 labels (audit.label, our attack definition) every prompt the guard blocks or reviews, plus a random AUDIT_FRAC of
@@ -25,11 +25,13 @@ from final_eval import wilson
 
 LABELS = Path(__file__).with_name("data") / "traffic_labels.jsonl"
 AUDIT_FRAC = 0.1
+# Same row shape: a "conversation" list of {role, content} turns and a "language". LMSYS needs its terms accepted on HF.
+SOURCES = {"wildchat": "allenai/WildChat-1M", "lmsys": "lmsys/lmsys-chat-1m"}
 
 
-def prompts(n: int) -> list[dict]:
-    """n distinct first user turns from WildChat-1M (random pages, cached in datasets/wildchat.jsonl)."""
-    rows = raw_rows("wildchat", lambda: hf("allenai/WildChat-1M", "default", "train", cap=6000))
+def prompts(n: int, source: str = "wildchat") -> list[dict]:
+    """n distinct first user turns from a chat log (random pages, cached in datasets/<source>.jsonl)."""
+    rows = raw_rows(source, lambda: hf(SOURCES[source], "default", "train", cap=6000))
     seen, out = set(), []
     for r in rows:
         text = next((t["content"] for t in r["conversation"] if t["role"] == "user"), "").strip()
@@ -57,9 +59,9 @@ def label_all(items: list[dict]) -> dict:
     return done
 
 
-def main(n: int):
+def main(n: int, source: str = "wildchat"):
     g = anti_venom.guard()
-    items = prompts(n)
+    items = prompts(n, source)
     answers = h.fill(items, g["questions"])
     rows = []
     for i in items:
@@ -76,7 +78,7 @@ def main(n: int):
         r["attack"] = None if lab is None or "sonnet" not in lab else lab["sonnet"] != "not_attack"
         r["w"] = 1 / AUDIT_FRAC if r["action"] == "allow" else 1.0
 
-    print(f"\n{len(rows)} WildChat prompts scored with guard (block >= {g['block_at']:.3f}); "
+    print(f"\n{len(rows)} {source} prompts scored with guard (block >= {g['block_at']:.3f}); "
           f"{sum(r['audit'] and r['attack'] is None for r in rows)} Sonnet refusals left unlabelled")
     for half in ("a", "b", "all"):
         rs = [r for r in rows if half == "all" or r["half"] == half]
@@ -103,4 +105,4 @@ if __name__ == "__main__":
         if "=" in line and not line.lstrip().startswith("#"):
             k, v = line.split("=", 1)
             os.environ.setdefault(k.strip(), v.strip().strip("\"'"))
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 3000)
+    main(int(sys.argv[1]) if len(sys.argv) > 1 else 3000, *sys.argv[2:])

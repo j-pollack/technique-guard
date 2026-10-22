@@ -70,7 +70,7 @@ Phase 2 replayed 480 test attacks against 9 OpenRouter models. SORRY-Bench attac
 
 The guard only targets attacks, not requests that are legitimate but may break a provider's terms (adult content, advocacy, professional advice), however they're wrapped. With SORRY-Bench attacks in those categories relabelled under that rule by Sonnet, test numbers are **84.6% of attacks blocked [83.0–86.1] at 7.6% FPR [6.4–8.9]**, and the guard blocks **70–77% of the attacks that work**.
 
-On realistic chat traffic (3,000 WildChat first turns, attacks labelled by Sonnet), the guard wrongly blocks **1.5% [1.1–2.0]** of prompts, against 7.6% on the deliberately hard test negatives. About 0.3% of those prompts were attacks. `traffic.py` reproduces this.
+On realistic chat traffic, with attacks labelled by Sonnet, the guard wrongly blocks **1.5% [1.1–2.0]** of WildChat first turns and **2.1% [1.7–2.8]** of LMSYS-Chat first turns. That's against 7.6% on the deliberately hard test negatives. LMSYS rises to 4.7% if a templated, ambiguous "say something toxic" probe is counted. Attacks made up about 0.3% (WildChat) and 3.3% (LMSYS) of these prompts. `traffic.py [n] wildchat|lmsys` reproduces this.
 
 Known weak spots:
 - **Benign prompts written in jailbreak style.** About 35% of WildGuardMix's adversarial-benign prompts are blocked. This is where nearly all false positives come from; ordinary and over-refusal prompts sit at 0–6%.
