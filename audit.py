@@ -2,6 +2,7 @@
 
     .venv/bin/python audit.py          # scraped dev sources (below)
     .venv/bin/python audit.py sorry    # SORRY-Bench attacks in categories outside our policy (dev and test)
+    .venv/bin/python audit.py sorry claude-opus-4-8   # retry the items an earlier model refused, with another model
 
 Picks, from AUDIT_SOURCES in the dev sample, every item the current hill-climb model disagrees with
 at the 5%-FPR threshold, plus a random 15% of the items it agrees with (so the audit estimates noise
@@ -51,9 +52,9 @@ SCHEMA = {
 client = None  # created in main(), after .env.local is loaded
 
 
-def label(text: str) -> dict:
+def label(text: str, model: str = MODEL) -> dict:
     msg = client.beta.messages.create(
-        model=MODEL,
+        model=model,
         max_tokens=2000,
         system=SYSTEM,
         output_config={"effort": "low", "format": {"type": "json_schema", "schema": SCHEMA}},
@@ -83,14 +84,15 @@ def sorry_picks(done: set) -> list:
             and cat[i["group"].split(":q")[1]] in SORRY_OUT_OF_POLICY]
 
 
-def main(mode: str = "scraped"):
+def main(mode: str = "scraped", model: str = MODEL):
     global client
     client = anthropic.Anthropic()
-    done = {json.loads(l)["text"] for l in AUDIT.read_text().splitlines()} if AUDIT.exists() else set()
+    rows = [json.loads(l) for l in AUDIT.read_text().splitlines()] if AUDIT.exists() else []
+    done = {r["text"] for r in rows if model == MODEL or "sonnet" in r}  # another model only retries refusals
     if mode == "sorry":
         pick = sorry_picks(done)
-        print(f"auditing {len(pick)} SORRY items in out-of-policy categories")
-        return run(pick)
+        print(f"auditing {len(pick)} SORRY items in out-of-policy categories with {model}")
+        return run(pick, model)
     items = h.dev_sample(150)
     answers = h.fill(items)
     rows = [(i, h.row(answers, i["text"])) for i in items]
@@ -112,9 +114,9 @@ def main(mode: str = "scraped"):
     run(pick)
 
 
-def run(pick: list):
+def run(pick: list, model: str = MODEL):
     with ThreadPoolExecutor(6) as pool, AUDIT.open("a", buffering=1) as out:
-        futures = {pool.submit(label, i["text"]): (i, d) for i, d in pick}
+        futures = {pool.submit(label, i["text"], model): (i, d) for i, d in pick}
         for f in as_completed(futures):
             (i, disagrees), res = futures[f], f.result()
             out.write(json.dumps({"text": i["text"], "source": i["source"], "family": i["family"], "split": i["split"],
