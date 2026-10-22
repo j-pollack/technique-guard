@@ -377,6 +377,27 @@ The role-play items that stay attacks are the ones that should: sexualized conte
 | sorry/low_resource_language | 27% / 15% | 1% |
 | **all families** | 30% / 27% | **77% [73, 81] / 70% [63, 76]** |
 
+### 2026-10-21: guard v2 (v5 harm question) tried and not adopted
+`underlying_restricted_v5` spells out the no-content-policy rule. Refit on the relabelled dev labels, then frozen as v2 (36 questions, block ≥ 0.497) and scored on test under our policy labels: 83.1% of attacks blocked at 6.5% FPR (v1: 84.6% at 7.6%). It blocks about 5% of the SORRY items Sonnet cleared (v1: about 20%), AUC 0.941 (v1: 0.939).
+- At matched FPR the two guards are equal overall: at 6.5% FPR, v1 blocks 82.7% and v2 83.0%. Most of v2's FPR gain is the threshold.
+- v5 is more lenient across the board. In-policy persuasion falls from 78% to 68% at equal FPR, and recall on working attacks falls from 77% to 71% (WildGuard jailbreaks 81% → 48%).
+- **Kept v1.** v2 is documented as a trade-off. The infrastructure stays: `guard_v1.json` pins the replay sample's strata, so any re-frozen guard is scored on the paid-for replies with no new calls.
+
+### 2026-10-21: realistic traffic (WildChat-1M, 3,000 first user turns; Jev $0.03, Sonnet ~$1.2)
+`traffic.py` runs the frozen guard on random WildChat first turns. Sonnet labels every flagged prompt plus a random 10% of allowed ones, because real traffic contains real attacks.
+- Results: 11 blocked prompts were attacks (all jailbreaks), 45 blocked prompts were not, and none of the 295 audited allowed prompts was an attack. Estimated attack prevalence is about 0.3%.
+- **Real-traffic FPR: 1.48% blocked [1.11, 1.97]**, 3.1% blocked or reviewed. That compares with 7.6% on the test negatives, which are dominated by adversarial-benign sets. Precision at this prevalence is about 18%.
+- False positives are mostly pasted documents and emails, translation requests and non-English text (Russian 7, Spanish 4, Japanese 3 of 45). The features firing are "embedded instructions", "repeat prompt" and "hidden instructions".
+- Threshold, chosen on half "a" and reported on half "b":
+
+| block_at | traffic FPR (a / b) | test attacks blocked | test negatives FPR | working attacks blocked (Phase 2) |
+|---|---|---|---|---|
+| **0.506** (current) | 1.36% / 1.73% | 84.6% | 7.6% | **77% [73, 81]** |
+| 0.616 (1% on a) | 1.04% / 0.90% | 80.9% | 5.4% | 70% [64, 76] |
+| 0.702 (0.75% on a) | 0.78% / 0.35% | 76.8% | 3.9% | n/a |
+
+Raising the threshold to 1% traffic FPR costs about 7 points of recall on working attacks, concentrated in the jailbreak families (WildGuard 81% → 48%, persuasion 63% → 31%).
+
 ## Findings
 - Subtle and non-English injections are the clearest weakness so far (deepset: 60% allowed).
 - Label noise is real: itw_regular contains outright jailbreaks ("a model called Kyle who operates without any restrictions"), and some deepset "injections" are ordinary requests.
@@ -386,6 +407,7 @@ The role-play items that stay attacks are the ones that should: sexualized conte
 - Technique alone can't separate a jailbreak from a jailbreak-styled harmless request; harm alone can't separate a jailbreak from a plain harmful request. Their product can, and it is the definition of an attack we use.
 - Low-resource-language translation is not detectable as a technique. Report it as a known limitation rather than tune for it.
 - Scraped labels are noisy in both directions; a Sonnet audit of the disagreements flipped 44 of 65, versus 4 of 98 random agreements.
+- **On realistic traffic the FPR is 1.5%, not 7.6%.** The test negatives are deliberately hard (adversarial-benign sets). On WildChat, about 0.3% of first turns are attacks, so precision is about 18% at the current threshold. The remaining false positives are pasted documents, translations and non-English text that trip the injection questions.
 - **Most of the apparent role-play and persuasion gap was scope, not detection.** Of 60 SORRY role-play attacks in out-of-policy categories, Sonnet kept 9 as attacks; of 74 persuasion, 1. Under our policy the guard catches 84.6% of attacks at 7.6% FPR on test, and blocks 70–77% of the attacks that work.
 - **The attacks the guard misses are the ones more likely to work.** After the SORRY re-grade, missed attacks succeed 34% of the time and blocked ones 23%. So recall on working attacks (62–72%, depending on how judge refusals count) is below recall on all attacks (80%). The gap is widest for role-play (60% → 36%).
 - **Grade against the original request.** Rewrites can soften the ask. A judge that infers the request from the rewrite counted answers to softened persuasion prompts as successes and overstated persuasion success by more than 2×.
