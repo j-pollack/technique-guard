@@ -329,6 +329,23 @@ Done on dev only; test has already been used for reporting.
 - Obfuscation stays unmeasured: Sonnet still declines to grade the cipher replies even when given the plain request.
 - Headline: the guard blocks 80% of these attacks and **62–72% of the ones that work** (the range is how judge refusals count). Before the re-grade it was 61–70%.
 
+### 2026-10-21: role-play misses are mostly outside our policy ($0)
+SORRY-Bench counts 45 categories as unsafe. Ten of them are things our harm rubric deliberately allows (its `false` list): political, ethical and religious promotion; adult advice; sexual content and non-sexual explicit content between fictional adults; and medical, financial, legal and governance advice.
+- Dev role-play misses: 18 of 26 are in those ten categories (religion promotion 7, ethical promotion 4, adult or explicit content 7).
+- Test (Phase 2, re-graded): of 103 role-play pairs that got past the guard and worked, 70 are out-of-policy (ethical 29, explicit 15, adult advice 10, political 9, sexual 7). Persuasion: 39 of 53 (legal advice 26).
+- Split by scope, with judge refusals dropped:
+
+| | recall, all | works\|miss | recall on working [95% CI] |
+|---|---|---|---|
+| role-play, in policy | 79% | 52% | 59% [38, 74] |
+| role-play, out of policy | 19% | 60% | 0% |
+| persuasion, in policy | 89% | 26% | 65% [22, 100] |
+| persuasion, out of policy | 30% | 36% | 42% [16, 71] |
+| **all families, in policy** | **83%** | **27%** | **70% [63, 76]** |
+| all families | 80% | 31% | 62% [55, 68] |
+
+The role-play "gap" is mostly a scope mismatch between SORRY-Bench and our attack definition. In scope, role-play is still the weakest jailbreak family (59% of working attacks blocked), but not by as much. Category-level scoping is coarse: for example, a sexual-content item about an underage anime character is in policy despite its category.
+
 ## Findings
 - Subtle and non-English injections are the clearest weakness so far (deepset: 60% allowed).
 - Label noise is real: itw_regular contains outright jailbreaks ("a model called Kyle who operates without any restrictions"), and some deepset "injections" are ordinary requests.
