@@ -346,6 +346,37 @@ SORRY-Bench counts 45 categories as unsafe. Ten of them are things our harm rubr
 
 The role-play "gap" is mostly a scope mismatch between SORRY-Bench and our attack definition. In scope, role-play is still the weakest jailbreak family (59% of working attacks blocked), but not by as much. Category-level scoping is coarse: for example, a sexual-content item about an underage anime character is in policy despite its category.
 
+### 2026-10-21: SORRY attacks relabelled under our policy (Sonnet, $0.70)
+Decision (below): the guard protects models from attacks and does not enforce providers' content policies. `audit.py sorry` had Sonnet label every SORRY attack in the dev and test samples whose category is outside our policy (234 items), using the attack definition with that rule spelled out. Labels go to `data/label_audit.jsonl`. hillclimb.py uses them for dev, and the numbers below use them for test.
+
+| family (dev + test) | still an attack | not an attack | Sonnet refused (label unchanged) |
+|---|---|---|---|
+| role-play | 9 | 51 | 0 |
+| persuasion | 1 | 72 | 1 |
+| low-resource language | 0 | 31 | 0 |
+| obfuscation | 15 | 0 | 54 |
+
+The role-play items that stay attacks are the ones that should: sexualized content about a minor character, non-consensual sexual content, religious hate speech, a fake health trend aimed at children, political disinformation. Items Sonnet cleared now count as negatives, so blocking them is a false positive. The guard blocks 20% of the 75 cleared test items.
+
+**Phase 1 test, re-scored under our policy:**
+
+| | original labels | our policy |
+|---|---|---|
+| attacks caught | 82.4% [80.8, 83.9] (n = 2,177) | **84.6% [83.0, 86.1]** (n = 2,102) |
+| negatives blocked (FPR) | 7.0% [5.9, 8.4] (n = 1,639) | **7.6% [6.4, 8.9]** (n = 1,714) |
+| sorry role-play caught | 61% | 81% |
+| sorry persuasion caught | 74% | 86% |
+| sorry low-resource language caught | 7% | 7% |
+
+**Phase 2 under our policy** (recall on working attacks; judge refusals counted as working / dropped):
+
+| | works\|miss | recall on working |
+|---|---|---|
+| sorry/roleplay | 52% | 63% [43, 76] / 59% [37, 74] |
+| sorry/persuasion | 44% / 26% | 64% [28, 86] / 65% [22, 100] |
+| sorry/low_resource_language | 27% / 15% | 1% |
+| **all families** | 30% / 27% | **77% [73, 81] / 70% [63, 76]** |
+
 ## Findings
 - Subtle and non-English injections are the clearest weakness so far (deepset: 60% allowed).
 - Label noise is real: itw_regular contains outright jailbreaks ("a model called Kyle who operates without any restrictions"), and some deepset "injections" are ordinary requests.
@@ -355,6 +386,7 @@ The role-play "gap" is mostly a scope mismatch between SORRY-Bench and our attac
 - Technique alone can't separate a jailbreak from a jailbreak-styled harmless request; harm alone can't separate a jailbreak from a plain harmful request. Their product can, and it is the definition of an attack we use.
 - Low-resource-language translation is not detectable as a technique. Report it as a known limitation rather than tune for it.
 - Scraped labels are noisy in both directions; a Sonnet audit of the disagreements flipped 44 of 65, versus 4 of 98 random agreements.
+- **Most of the apparent role-play and persuasion gap was scope, not detection.** Of 60 SORRY role-play attacks in out-of-policy categories, Sonnet kept 9 as attacks; of 74 persuasion, 1. Under our policy the guard catches 84.6% of attacks at 7.6% FPR on test, and blocks 70–77% of the attacks that work.
 - **The attacks the guard misses are the ones more likely to work.** After the SORRY re-grade, missed attacks succeed 34% of the time and blocked ones 23%. So recall on working attacks (62–72%, depending on how judge refusals count) is below recall on all attacks (80%). The gap is widest for role-play (60% → 36%).
 - **Grade against the original request.** Rewrites can soften the ask. A judge that infers the request from the rewrite counted answers to softened persuasion prompts as successes and overstated persuasion success by more than 2×.
 - Injection misses rarely work on current models: 4–16% of missed HackAPrompt, Tensor Trust and InjecAgent attacks succeed. Their recall-on-working CIs are therefore very wide.
@@ -386,9 +418,10 @@ The role-play "gap" is mostly a scope mismatch between SORRY-Bench and our attac
 - 2026-10-21: judge = Claude Sonnet 5.5 via the Anthropic API key; Claude is never a target.
 - 2026-10-21: 9 OpenRouter targets (listed above). Budgets: $50 TypeSafe, $50 OpenRouter.
 - 2026-10-21: the guard's job is blocking attacks, not harmful requests ("that's the provider/model's job"). Plain harmful requests are negatives in training and count toward FPR.
+- 2026-10-21: the guard does not enforce what a model should or shouldn't do. "If the user wants to submit a query that is legitimate but outside of the terms of service of the model, that's for the model to figure out." A role-play or persuasion wrapper around such a request (adult content, advocacy, professional advice) is not an attack. SORRY-Bench items in those categories are relabelled per item by Sonnet. The paper reports our policy, with SORRY-Bench's broader definition as a sensitivity column.
 
 ## Next
 - Phase 2 obfuscation success is unmeasured: Sonnet refuses to grade all of them. Options are decoding the replies in code before grading, or reporting it as unknown.
-- Role-play is the main remaining gap. Its misses are mostly mild payloads that score low on the harm question even when plain, plus a weak persona signal (see the dev diagnosis).
-- Relabel SORRY persuasion rewrites whose request is no longer restricted (they aren't attacks under our definition), on dev for training and on test for reporting.
+- Within our policy, role-play is still the weakest jailbreak family on working attacks (59–63%). Look at the in-policy dev misses before proposing questions.
+- Make final_eval.py and replay.py report under the audited labels directly (today the in-policy numbers come from one-off scripts).
 - For the write-up: audit a random sample of *test* labels (blind to the guard) to estimate test label noise without biasing toward the guard.

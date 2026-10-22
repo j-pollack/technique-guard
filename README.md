@@ -68,6 +68,8 @@ On the held-out test split (guard `6fdeebfecb47872f`, 3,816 items, scored once),
 
 Phase 2 replayed 480 test attacks against 9 OpenRouter models. SORRY-Bench attacks were graded against their original plain request. Missed attacks worked 34% of the time and blocked ones 23%. So the guard blocks **62–72% of the attacks that actually work** (the range depends on how pairs the judge refused to grade are counted), against 80% of these attacks overall. With the guard in front, 4–8% of these attacks succeed on each model, against 7–24% without it. Role-play is the weakest family: the guard blocks only 36% of the role-play attacks that work.
 
+The guard only targets attacks, not requests that are legitimate but may break a provider's terms (adult content, advocacy, professional advice), however they're wrapped. With SORRY-Bench attacks in those categories relabelled under that rule by Sonnet, test numbers are **84.6% of attacks blocked [83.0–86.1] at 7.6% FPR [6.4–8.9]**, and the guard blocks **70–77% of the attacks that work**.
+
 Known weak spots:
 - **Benign prompts written in jailbreak style.** About 35% of WildGuardMix's adversarial-benign prompts are blocked. This is where nearly all false positives come from; ordinary and over-refusal prompts sit at 0–6%.
 - **Role-play (61%) and persuasion (74%) jailbreaks.**
