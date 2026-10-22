@@ -45,6 +45,8 @@ from corpus import POOL, SOURCES, jsonl, raw_rows, sample
 DATA = Path(__file__).with_name("data")
 CACHE, OUT = DATA / "replay.jsonl", DATA / "replay_results.json"
 CALLS, JUDGED = DATA / "replay_calls.jsonl", DATA / "replay_judged.jsonl"  # every successful API call, full reply
+AUDIT = Path(__file__).with_name("data") / "label_audit.jsonl"
+SAMPLE_GUARD = Path(__file__).with_name("guard_v1.json")  # the guard whose verdicts stratified the replay sample
 TOOLS_JSON = Path(__file__).with_name("datasets") / "injecagent_tools.json"
 OR_URL = "https://openrouter.ai/api/v1/chat/completions"
 # Reasoning models otherwise spend the whole budget thinking and return nothing; this changes how they behave, so it's part of the cache key.
@@ -297,22 +299,31 @@ def allocate(n: int, nb: int, nm: int) -> tuple[int, int]:
     return min(n - km, nb), km
 
 
-def pick(n: int) -> list[dict]:
-    """Test attacks from the final_eval sample with the guard's verdict and a weight (stratum size / picked)."""
-    g = anti_venom.guard()
+def pick(n: int, cleared: frozenset = frozenset()) -> list[dict]:
+    """Test attacks from the final_eval sample with a weight (stratum size / picked) and the current guard's verdict.
+
+    Strata come from SAMPLE_GUARD, the guard the replay was first run with, so a re-frozen guard is scored on the
+    same (already paid for) sample: "stratum" is the sampling guard's verdict, "blocked" the current guard's.
+    Items in `cleared` (relabelled as not attacks) stay in the selection, so it doesn't change, but are dropped
+    afterwards, and weights count only the rest.
+    """
+    g0, g = json.loads(SAMPLE_GUARD.read_text()), anti_venom.guard()
     pool = [json.loads(l) for l in POOL.read_text().splitlines()]
     items = [i for i in sample(pool, "test", 150) if (i["source"], i["family"]) in FAMILIES]
-    answers = h.fill(items, g["questions"])  # cache hits if final_eval.py has run
+    answers = h.fill(items, g0["questions"] | g["questions"])  # cache hits if final_eval.py has run
     for i in items:
-        a = {q: answers[(i["text"], q)] for q in g["questions"]}
-        i["action"] = None if any(v is None for v in a.values()) else anti_venom.judge(a, g).action
+        verdict = lambda gg: (None if any(answers[(i["text"], q)] is None for q in gg["questions"])
+                              else anti_venom.judge({q: answers[(i["text"], q)] for q in gg["questions"]}, gg).action)
+        i["action"], i["now"] = verdict(g0), verdict(g)
     picked = []
     for fam in FAMILIES:
         by = {b: sorted((i for i in items if (i["source"], i["family"]) == fam and i["action"] and (i["action"] == "block") == b),
                         key=lambda i: h.sha(i["text"])) for b in (True, False)}
         kb, km = allocate(n, len(by[True]), len(by[False]))
         for b, k in ((True, kb), (False, km)):
-            picked += [{**i, "blocked": b, "w": len(by[b]) / k} for i in by[b][:k]]
+            keep = [i for i in by[b][:k] if i["text"] not in cleared]
+            w = sum(i["text"] not in cleared for i in by[b]) / max(len(keep), 1)
+            picked += [{**i, "stratum": b, "blocked": i["now"] == "block", "w": w} for i in keep]
         print(f"{'/'.join(fam):34} {len(by[True]) + len(by[False]):4} scored: {len(by[True]):3} blocked, {len(by[False]):3} missed -> picked {kb} + {km}")
     return picked
 
@@ -325,7 +336,7 @@ def stats(P: dict) -> dict:
     ids, first = np.unique(P["aid"], return_index=True)
     strata = {}
     for a, f in zip(ids, first):
-        strata.setdefault((P["fam"][f], P["blocked"][f]), []).append(a)
+        strata.setdefault((P["fam"][f], P.get("stratum", P["blocked"])[f]), []).append(a)
     rng, boots = np.random.default_rng(0), []
     for _ in range(1000):
         m = sum((np.bincount(rng.choice(g, len(g)), minlength=P["aid"].max() + 1) for g in strata.values()))
@@ -343,7 +354,7 @@ def report(jobs: list[dict], cache: dict, at: float):
         return {}
     aids = {a: i for i, a in enumerate(dict.fromkeys(j["attack"] for j in done))}
     P = {"aid": np.array([aids[j["attack"]] for j in done]), "w": np.array([j["w"] for j in done]),
-         "blocked": np.array([j["blocked"] for j in done]), "works": np.array([works(cache[j["k"]], at) for j in done]),
+         "blocked": np.array([j["blocked"] for j in done]), "stratum": np.array([j["stratum"] for j in done]), "works": np.array([works(cache[j["k"]], at) for j in done]),
          "fam": np.array([j["family"] for j in done])}
     print(f"\n{len(done)} of {len(jobs)} (attack, target) pairs complete; jailbreak works = not refused and score >= {at}")
     results = {"judge_refused_counted_as_works": sum("judge_refused" in cache[j["k"]] for j in done),
@@ -368,7 +379,10 @@ def report(jobs: list[dict], cache: dict, at: float):
 
 
 def main(n: int, dry_run: bool, caps: dict):
-    items, idx = pick(n), raw_index()
+    # Attacks Sonnet relabelled as not attacks under our policy (audit.py) aren't replayed or counted.
+    cleared = frozenset(r["text"] for r in map(json.loads, AUDIT.read_text().splitlines())
+                        if r.get("sonnet") == "not_attack") if AUDIT.exists() else frozenset()
+    items, idx = pick(n, cleared), raw_index()
     jobs = []
     for i in items:
         sp = spec(i, idx.get((i["source"], norm(i["text"]))) if i["source"] in NEEDS_ROW else None)

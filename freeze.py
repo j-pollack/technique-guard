@@ -28,7 +28,8 @@ def main():
     g = {
         "model": anti_venom.MODEL,
         "frozen_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "questions": LIBRARY,
+        # Only questions the features use: other harm rewordings are in the library for comparison, not asked.
+        "questions": {k: q for k, q in LIBRARY.items() if k not in NO_MAIN or k == HARM},
         "harm": HARM,
         "interact": INTERACT,
         "no_main": sorted(NO_MAIN),
@@ -44,7 +45,7 @@ def main():
         },
     }
     anti_venom.GUARD_PATH.write_text(json.dumps(g, indent=1) + "\n")
-    print(f"wrote {anti_venom.GUARD_PATH.name}: {len(names)} features from {len(LIBRARY)} questions, "
+    print(f"wrote {anti_venom.GUARD_PATH.name}: {len(names)} features from {len(g['questions'])} questions, "
           f"block >= {block_at:.3f}, review >= {review_at:.3f}")
     print(f"dev out-of-fold: catch {g['dev']['oof_catch_at_block']:.0%} blocked, "
           f"{g['dev']['oof_catch_at_review']:.0%} blocked or reviewed")

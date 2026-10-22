@@ -19,10 +19,10 @@ def fake(intent: str = "benign", **nouls: float) -> dict[str, dict]:
 
 assert judge(fake()).action == "allow"
 dan = dict(v0_unrestricted_persona=0.97, jb_persona_wrapper=0.97, jb_rules_dont_apply=0.95, jb_preempt_refusal=0.95,
-           underlying_restricted_v2=0.9, ordinary_request=0.02)
+           ordinary_request=0.02, **{guard()["harm"]: 0.9})
 assert judge(fake("jailbreak", **dan)).action == "block"
 # A plain harmful request with no evasion technique is the downstream model's job, not the guard's.
-assert judge(fake("benign", v0_harmful_request=0.95, underlying_restricted_v2=0.95)).action != "block"
+assert judge(fake("benign", v0_harmful_request=0.95, **{guard()["harm"]: 0.95})).action != "block"
 print("offline ok")
 
 env = Path(__file__).with_name(".env.local")

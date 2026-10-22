@@ -4,7 +4,7 @@
 
 Reports, per (source, family): block / review / allow rates with a 95% Wilson interval on the block
 rate (catch rate for attacks, false-positive rate for negatives). Also the v0 guard at its original
-0.8 threshold for comparison. Test labels are the original dataset labels (the Sonnet audit was dev
+0.8 threshold for comparison. Test labels are the dataset labels except SORRY attacks relabelled under our policy (audit.py sorry; the scraped-source audit was dev
 only). Results go to data/test_results.json; every run is logged to data/test_runs.jsonl with the
 guard's hash, and a second run on the same guard warns loudly.
 """
@@ -47,6 +47,12 @@ def main(n: int):
 
     pool = [json.loads(l) for l in POOL.read_text().splitlines()]
     items = sample(pool, "test", n)
+    # Labels under our policy: SORRY attacks Sonnet relabelled (audit.py sorry) replace the dataset label.
+    audit = DATA / "label_audit.jsonl"
+    relabel = {r["text"]: int(r["sonnet"] != "not_attack") for r in map(json.loads, audit.read_text().splitlines())
+               if r.get("split") == "test" and "sonnet" in r} if audit.exists() else {}
+    items = [{**i, "label_orig": i["label"], "label": relabel.get(i["text"], i["label"])} for i in items]
+    print(f"{sum(i['label'] != i['label_orig'] for i in items)} test labels changed by the policy relabel\n")
     questions = g["questions"] | {f"v0_{k}": q for k, q in V0.items()}
     answers = h.fill(items, questions)
     rows = []
@@ -65,16 +71,16 @@ def main(n: int):
         return k / len(rs), lo, hi
 
     results = {"guard": ghash, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "n": len(rows), "families": {}}
-    print(f"{'source':14} {'family':22} {'n':>4} {'block':>6} {'95% CI':>13} {'review':>7} {'allow':>6} {'v0 block':>9}")
-    for key in sorted({(r["source"], r["family"]) for r in rows}):
-        rs = [r for r in rows if (r["source"], r["family"]) == key]
+    print(f"{'source':14} {'family':20} {'y':>1} {'n':>4} {'block':>6} {'95% CI':>13} {'review':>7} {'allow':>6} {'v0 block':>9}")
+    for key in sorted({(r["source"], r["family"], r["label"]) for r in rows}):
+        rs = [r for r in rows if (r["source"], r["family"], r["label"]) == key]
         b, lo, hi = block_stats(rs)
         rev = sum(r["action"] == "review" for r in rs) / len(rs)
         al = sum(r["action"] == "allow" for r in rs) / len(rs)
         v0b = sum(r["v0_block"] for r in rs) / len(rs)
         tag = " (held out)" if key[0] in HELD_OUT else ""
-        print(f"{key[0]:14} {key[1]:22} {len(rs):4} {b:6.0%}  [{lo:4.0%},{hi:4.0%}] {rev:7.0%} {al:6.0%} {v0b:9.0%}{tag}")
-        results["families"]["/".join(key)] = {"n": len(rs), "label": rs[0]["label"], "block": b, "ci": [lo, hi],
+        print(f"{key[0]:14} {key[1]:20} {key[2]:1} {len(rs):4} {b:6.0%}  [{lo:4.0%},{hi:4.0%}] {rev:7.0%} {al:6.0%} {v0b:9.0%}{tag}")
+        results["families"]["/".join(map(str, key))] = {"n": len(rs), "label": rs[0]["label"], "block": b, "ci": [lo, hi],
                                               "review": rev, "allow": al, "v0_block": v0b, "held_out": bool(tag)}
 
     y = np.array([r["label"] for r in rows])
