@@ -45,7 +45,6 @@ from corpus import POOL, SOURCES, jsonl, raw_rows, sample
 DATA = Path(__file__).with_name("data")
 CACHE, OUT = DATA / "replay.jsonl", DATA / "replay_results.json"
 CALLS, JUDGED = DATA / "replay_calls.jsonl", DATA / "replay_judged.jsonl"  # every successful API call, full reply
-AUDIT = Path(__file__).with_name("data") / "label_audit.jsonl"
 SAMPLE_GUARD = Path(__file__).with_name("guard_v1.json")  # the guard whose verdicts stratified the replay sample
 TOOLS_JSON = Path(__file__).with_name("datasets") / "injecagent_tools.json"
 OR_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -379,9 +378,11 @@ def report(jobs: list[dict], cache: dict, at: float):
 
 
 def main(n: int, dry_run: bool, caps: dict):
-    # Attacks Sonnet relabelled as not attacks under our policy (audit.py) aren't replayed or counted.
-    cleared = frozenset(r["text"] for r in map(json.loads, AUDIT.read_text().splitlines())
-                        if r.get("sonnet") == "not_attack") if AUDIT.exists() else frozenset()
+    # Only attacks under the content-agnostic definition (audit.technique_label) are replayed or counted.
+    import audit
+    labels = audit.technique_labels()
+    pool = [json.loads(l) for l in POOL.read_text().splitlines()]
+    cleared = frozenset(i["text"] for i in sample(pool, "test", 150) if audit.technique_label(i, labels) != 1)  # not an attack, or unlabelled (Sonnet refused)
     items, idx = pick(n, cleared), raw_index()
     jobs = []
     for i in items:

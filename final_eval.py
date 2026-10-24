@@ -47,12 +47,13 @@ def main(n: int):
 
     pool = [json.loads(l) for l in POOL.read_text().splitlines()]
     items = sample(pool, "test", n)
-    # Labels under our policy: SORRY attacks Sonnet relabelled (audit.py sorry) replace the dataset label.
-    audit = DATA / "label_audit.jsonl"
-    relabel = {r["text"]: int(r["sonnet"] != "not_attack") for r in map(json.loads, audit.read_text().splitlines())
-               if r.get("split") == "test" and "sonnet" in r} if audit.exists() else {}
-    items = [{**i, "label_orig": i["label"], "label": relabel.get(i["text"], i["label"])} for i in items]
-    print(f"{sum(i['label'] != i['label_orig'] for i in items)} test labels changed by the policy relabel\n")
+    # Content-agnostic labels (audit.technique_label); items Sonnet refused to label are dropped.
+    import audit
+    labels = audit.technique_labels()
+    items = [{**i, "label_orig": i["label"], "label": audit.technique_label(i, labels)} for i in items]
+    print(f"{sum(i['label'] is None for i in items)} test items unlabelled (Sonnet refused), dropped; "
+          f"{sum(i['label'] is not None and i['label'] != i['label_orig'] for i in items)} labels differ from the dataset\n")
+    items = [i for i in items if i["label"] is not None]
     questions = g["questions"] | {f"v0_{k}": q for k, q in V0.items()}
     answers = h.fill(items, questions)
     rows = []

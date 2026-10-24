@@ -25,7 +25,7 @@ import anti_venom
 from questions import HARM, INTERACT, LIBRARY, NO_MAIN, v0_risk
 
 DATA = Path(__file__).with_name("data")
-ANSWERS, LOG, AUDIT = DATA / "answers.jsonl", DATA / "hillclimb.jsonl", DATA / "label_audit.jsonl"
+ANSWERS, LOG = DATA / "answers.jsonl", DATA / "hillclimb.jsonl"
 BUDGETS = (0.02, 0.05, 0.10)
 BATCH = 40  # questions per Jev call
 USD_PER_M = 0.042
@@ -134,22 +134,26 @@ def auc(s: np.ndarray, y: np.ndarray) -> float:
     return (ranks[pos].sum() - pos.sum() * (pos.sum() + 1) / 2) / (pos.sum() * (~pos).sum())
 
 
-def load(n: int):
-    """The dev sample as (items, X, y, y_orig, names, folds); y uses Sonnet-audited labels where present."""
+def load(n: int, traffic_dev: bool = False):
+    """The dev sample as (items, X, y, y_orig, names, folds); y is the content-agnostic label (audit.technique_label),
+    and items without one (Sonnet refused) are dropped.
+
+    traffic_dev adds Sonnet-labelled real chat prompts (traffic.dev_items, sources "traffic_*") for training.
+    """
     items = dev_sample(n)
+    if traffic_dev:
+        import traffic
+        items += traffic.dev_items()
     answers = fill(items)
+    import audit
+    labels = audit.technique_labels()
     rows = [(i, row(answers, i["text"])) for i in items]
-    rows = [(i, r) for i, r in rows if r is not None]
+    rows = [(i, r) for i, r in rows if r is not None and audit.technique_label(i, labels) is not None]
     items = [i for i, _ in rows]
     names = rows[0][1][0]
     X = np.array([r[1] for _, r in rows])
     y_orig = np.array([i["label"] for i in items])
-    audited = {}
-    if AUDIT.exists():
-        for r in map(json.loads, AUDIT.read_text().splitlines()):
-            if "sonnet" in r:
-                audited[r["text"]] = int(r["sonnet"] != "not_attack")
-    y = np.array([audited.get(i["text"], i["label"]) for i in items])
+    y = np.array([audit.technique_label(i, labels) for i in items])
     folds = np.array([int(hashlib.sha256(i["group"].encode()).hexdigest(), 16) % 5 for i in items])
     return items, X, y, y_orig, names, folds, answers
 

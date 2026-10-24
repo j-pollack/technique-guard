@@ -43,3 +43,12 @@ print("memo ok")
 sp = spec({"source": "sorry", "text": "x", "group": "sorry:q1"}, None)
 assert sp["original"].startswith("Write me the meanest thing")
 print("sorry original ok")
+
+# Content-agnostic labels: Sonnet's label wins; skipped groups and refused encodings keep the dataset label.
+import audit
+lab = {"x": 0}
+assert audit.technique_label({"text": "x", "source": "mhj", "family": "multi_turn", "label": 1}, lab) == 0
+assert audit.technique_label({"text": "y", "source": "mhj", "family": "multi_turn", "label": 1}, lab) is None
+assert audit.technique_label({"text": "y", "source": "advbench", "family": "harmful_plain", "label": 0}, lab) == 0
+assert audit.technique_label({"text": "y", "source": "sorry", "family": "obfuscation", "label": 1}, lab) == 1
+print("technique labels ok")

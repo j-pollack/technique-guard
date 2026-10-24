@@ -27,6 +27,7 @@ LABELS = Path(__file__).with_name("data") / "traffic_labels.jsonl"
 AUDIT_FRAC = 0.1
 # Same row shape: a "conversation" list of {role, content} turns and a "language". LMSYS needs its terms accepted on HF.
 SOURCES = {"wildchat": "allenai/WildChat-1M", "lmsys": "lmsys/lmsys-chat-1m"}
+EVAL_N = 3000  # prompts(EVAL_N) is the evaluation sample; the rest of each cached log is traffic-dev, for training
 
 
 def prompts(n: int, source: str = "wildchat") -> list[dict]:
@@ -43,17 +44,42 @@ def prompts(n: int, source: str = "wildchat") -> list[dict]:
     return out[:n]
 
 
+def dev_items() -> list[dict]:
+    """Traffic-dev: Sonnet-labelled prompts outside the evaluation sample, in hillclimb's item shape.
+
+    Picked by guard v1 (every review-or-block, plus a random AUDIT_FRAC of the rest), so hard negatives are
+    over-represented. Only labelled prompts are returned: unlabelled ones would be ~3% unknown attacks on LMSYS.
+    """
+    g = json.loads(Path(__file__).with_name("guard_v1.json").read_text())
+    rng, pick = random.Random(2), []
+    for s in SOURCES:
+        items = prompts(10**6, s)[EVAL_N:]
+        answers = h.fill(items, g["questions"])
+        for i in items:
+            a = {q: answers[(i["text"], q)] for q in g["questions"]}
+            if all(v is not None for v in a.values()) and (anti_venom.judge(a, g).action != "allow" or rng.random() < AUDIT_FRAC):
+                pick.append(i | {"source": f"traffic_{s}"})
+    labels = label_all(pick)
+    return [i | {"family": "traffic", "split": "dev", "group": "traffic:" + hashlib.sha256(i["text"].encode()).hexdigest()[:16],
+                 "label": int(labels[i["text"]]["sonnet"] != "not_attack")}
+            for i in pick if "sonnet" in labels[i["text"]]]
+
+
 def label_all(items: list[dict]) -> dict:
+    """Sonnet labels under the content-agnostic definition (audit.SYSTEM_TECHNIQUE), cached in audit.TECHNIQUE.
+
+    LABELS (traffic_labels.jsonl) holds the earlier policy-definition labels and is no longer written."""
     import anthropic
     import audit
     audit.client = anthropic.Anthropic()
-    done = {r["text"]: r for r in map(json.loads, LABELS.read_text().splitlines())} if LABELS.exists() else {}
+    done = ({r["text"]: r for r in map(json.loads, audit.TECHNIQUE.read_text().splitlines()) if r.get("def") == audit.DEF}
+            if audit.TECHNIQUE.exists() else {})
     todo = [i for i in items if i["text"] not in done]
     print(f"Sonnet labels needed: {len(todo)}")
-    with ThreadPoolExecutor(6) as pool, LABELS.open("a", buffering=1) as out:
-        futures = {pool.submit(audit.label, i["text"]): i for i in todo}
+    with ThreadPoolExecutor(6) as pool, audit.TECHNIQUE.open("a", buffering=1) as out:
+        futures = {pool.submit(audit.label, i["text"], audit.MODEL, audit.SYSTEM_TECHNIQUE): i for i in todo}
         for f in as_completed(futures):
-            row = {"text": futures[f]["text"], **f.result()}
+            row = {"text": futures[f]["text"], "def": audit.DEF, **f.result()}
             done[row["text"]] = row
             out.write(json.dumps(row) + "\n")
     return done
@@ -105,4 +131,4 @@ if __name__ == "__main__":
         if "=" in line and not line.lstrip().startswith("#"):
             k, v = line.split("=", 1)
             os.environ.setdefault(k.strip(), v.strip().strip("\"'"))
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 3000, *sys.argv[2:])
+    main(int(sys.argv[1]) if len(sys.argv) > 1 else EVAL_N, *sys.argv[2:])

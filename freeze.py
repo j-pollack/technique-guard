@@ -2,15 +2,18 @@
 
     .venv/bin/python freeze.py
 
-Weights: logistic regression on the hill-climbing dev sample (audited labels).
-Thresholds: read off out-of-fold dev scores (5-fold by near-dup group), so they aren't flattered by
-the in-sample fit. Block from the BLOCK_FPR point, review from the REVIEW_FPR point.
+Weights: logistic regression on the hill-climbing dev sample (audited labels) plus traffic-dev (Sonnet-labelled
+real chat prompts outside the traffic evaluation sample; see traffic.dev_items).
+Thresholds: read off out-of-fold scores (5-fold by near-dup group) of the benchmark dev items only, so they aren't
+flattered by the in-sample fit and keep the same meaning as guard v1's. Block from the BLOCK_FPR point, review from the REVIEW_FPR point.
 """
 
 import json
 import os
 import time
 from pathlib import Path
+
+import numpy as np
 
 import anti_venom
 import hillclimb as h
@@ -20,10 +23,12 @@ BLOCK_FPR, REVIEW_FPR = 0.05, 0.10
 
 
 def main():
-    items, X, y, _, names, folds, _ = h.load(150)
+    items, X, y, _, names, folds, _ = h.load(150, traffic_dev=True)
     oof = h.cv_scores(X, y, folds)
-    block_at = float(h.threshold_at(oof, y, BLOCK_FPR))
-    review_at = float(h.threshold_at(oof, y, REVIEW_FPR))
+    dev = np.array([not i["source"].startswith("traffic_") for i in items])
+    traffic_n = int((~dev).sum())
+    block_at = float(h.threshold_at(oof[dev], y[dev], BLOCK_FPR))
+    review_at = float(h.threshold_at(oof[dev], y[dev], REVIEW_FPR))
     w = h.fit(X, y)
     g = {
         "model": anti_venom.MODEL,
@@ -38,10 +43,10 @@ def main():
         "block_at": block_at,
         "review_at": review_at,
         "dev": {
-            "n": len(items), "attacks": int(y.sum()),
+            "n": int(dev.sum()), "attacks": int(y[dev].sum()), "traffic_dev": traffic_n,
             "block_fpr_target": BLOCK_FPR, "review_fpr_target": REVIEW_FPR,
-            "oof_catch_at_block": float((oof[y == 1] > block_at).mean()),
-            "oof_catch_at_review": float((oof[y == 1] > review_at).mean()),
+            "oof_catch_at_block": float((oof[dev & (y == 1)] > block_at).mean()),
+            "oof_catch_at_review": float((oof[dev & (y == 1)] > review_at).mean()),
         },
     }
     anti_venom.GUARD_PATH.write_text(json.dumps(g, indent=1) + "\n")
