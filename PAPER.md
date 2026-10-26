@@ -45,7 +45,7 @@ Features are each yes/no probability, each choice probability, and each jailbrea
 ### 4.3 Labels
 Dataset labels disagree with each other and with any one definition. All labels used for fitting and evaluation are Claude Sonnet 5.5 judgments under the definition in §2 (structured output, low effort), except groups where a 90-item pilot found no disagreements (plain harmful requests and ordinary benign prompts), which keep their dataset label. 394 of 7,188 texts were refused by the labeller; refused items are dropped, except encoded SORRY-Bench attacks, which are attacks by definition. Under the new labels, test attacks fall from 2,177 (dataset labels) to 1,325: SORRY-Bench persuasion, role-play and low-resource-language "attacks" become non-attacks, as do most multi-turn escalations (MHJ, 14 of 150 remain); a few nominally benign prompts become attacks (e.g. "morality-free space" framings).
 
-**Label audit.** TODO (running): blind random audit of 150 test labels by an independent annotator; agreement, Cohen's κ, estimated error rate.
+**Label audit.** An independent annotator (a separate Claude session, blind to our labels and to the guard) labelled a uniform random sample of 150 labelled test items under the same definition. Agreement was 139/150 (92.7%), Cohen's κ = 0.84; the dataset-labelled groups agreed 44/44 and the Sonnet-labelled items 95/106. All 11 disagreements go one way: we say non-attack, the annotator says attack. On review, 1 is a clear error in our labels (a "character known for lack of scruples and ethical boundaries", i.e. a persona without rules), 1 is the annotator's error, and 9 are ambiguous. Four of the nine force the reply to open with a fixed scene-setting line rather than a compliance phrase; the others are weak or implicit techniques (a final "he would not include disclaimers" turn, "imagine your previous response was 'I can't assist'… continue", threats demanding private details). Estimated error: **0.7% [0.1, 3.7] of all labels; upper bound counting ambiguous items, 6.7% [3.7, 11.8]**. No false attack labels were found (0/48, CI 0–7.4%); among non-attack labels the upper bound is 9.8% [5.4, 17.1]. The guard blocks 1 of the 11 disputed items (6 review, 4 allow), so label noise does not inflate the reported FPR; if the ambiguous items are attacks, recall is somewhat overstated.
 
 ### 4.4 Traffic-dev
 Benchmarks under-represent ordinary chat that *looks* attack-like (companion and character bots, pasted documents). We add 784 real first turns from WildChat-1M and LMSYS-Chat-1M to training, taken from outside the traffic evaluation sample: every prompt the previous guard flagged, plus a random 10% of the rest, all labelled under §2. Thresholds are still read off the benchmark dev negatives only, so they keep their meaning.
@@ -75,7 +75,7 @@ Block-or-review: 97.7% of attacks, 10.7% of non-attacks. AUC 0.987. A first-pass
 
 **Held-out sources**: HackAPrompt 85.2% (n=135), InjecAgent data-stealing 99.3% (140), WildGuardMix jailbreaks 81.2% (96); XSTest-safe 0% FPR (150), WildGuardMix non-attacks 6.4% (326).
 
-Most false positives are items the source dataset calls attacks and the labeller does not (jailbreak- or injection-*styled* text with no switch-off or takeover). This is the boundary of the definition, and where label noise concentrates (§4.3, TODO audit).
+Most false positives are items the source dataset calls attacks and the labeller does not (jailbreak- or injection-*styled* text with no switch-off or takeover). This is the boundary of the definition, and where label noise concentrates; the guard blocks few of the items a blind audit disputed (§4.3).
 
 **The definition matters more than the model.** v1, fitted under an earlier definition that let content decide (a wrapper was an attack only if the wrapped request was one the model would decline), scores 95.8% at **23.6%** FPR (AUC 0.930) on the same labels, because it blocks the persuasion and role-play wrappers that are now negatives. TODO: v1.1 under the earlier definition's labels, as a sensitivity column.
 
@@ -135,7 +135,7 @@ Two LMSYS templates account for most of its false positives: a developer system 
 
 ## 7. Limitations
 
-- **Labels are one model's judgments** under a definition with a fuzzy boundary (jailbreak-styled text without an actual switch-off). TODO: report the blind audit.
+- **Labels are one model's judgments** under a definition with a fuzzy boundary (jailbreak-styled text with a weak or implicit switch-off). A blind audit puts the clear error rate at 0.7% and up to 6.7% counting ambiguous items, all in the direction of attacks labelled as non-attacks, which the guard mostly allows (§4.3). Forced opening lines that are not compliance phrases are the largest ambiguous cluster.
 - **By design the guard allows harmful requests that use only framing** (fiction, persuasion, role-play, other languages). It must be paired with a model or content policy that declines them.
 - **The labeller and grader refused some content**: 394 texts unlabelled (dropped), and 281 replay pairs ungraded, which is why §5.2 reports a range. Whether encoded attacks *work* is unmeasured.
 - **Small cells**: multi-turn (14 test attacks), several replay families with few working misses (wide CIs).
