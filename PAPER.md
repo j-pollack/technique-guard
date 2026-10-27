@@ -6,7 +6,7 @@
 
 We built a guard that sits in front of an LLM and blocks prompt injection and jailbreaks. It asks a small, cheap judgment model (TypeSafe's Jev, pinned to `jev-1.14.0`) 36 plain-English questions about each input, and a logistic regression turns the answers into a score. The guard looks only at *how* an input tries to manipulate the model, never at *what* it asks for. Whether a request should be answered is the downstream model's call, not the guard's. We define attacks with NIST's taxonomy (AI 100-2e2025), trimmed to the techniques you can actually see in the text.
 
-On a held-out test set of 4,129 items from 25 public datasets, the guard blocks **92.9% of attacks [91.6, 94.1] and wrongly blocks 5.5% of non-attacks [4.6, 6.4]**. Seven of those sources were never touched during tuning, including machine-generated adversarial suffixes, of which it blocks 97.5%. We also replayed a sample of the test attacks against nine production models to find out which ones actually work. The guard blocks **86–93% of the attacks that work**, and cuts the share of attacks that succeed from 9.5% to 1.4%. On real chat logs it wrongly blocks **0.23%** of WildChat and **0.84%** of LMSYS-Chat first messages.
+On a held-out test set of 4,129 items from 25 public datasets, the guard blocks **92.9% of attacks [91.6, 94.1] and wrongly blocks 5.5% of non-attacks [4.6, 6.4]**. Seven of those sources were never touched during tuning, including machine-generated adversarial suffixes, of which it blocks 97.5%. We also replayed a sample of the test attacks against nine production models to find out which ones actually work. The guard blocks **86–93% of the attacks that work**, and cuts the share of attacks that succeed from 9.5% to 1.4%. On real chat logs it wrongly blocks **0.23%** of WildChat and **0.84%** of LMSYS-Chat first messages. On the same data, Meta's Llama Prompt Guard 2 (86M) reaches AUC 0.846 to our 0.985: it misses nearly all indirect and encoded attacks, and wrongly blocks 3.8% of WildChat.
 
 A few things we learned along the way: how you define "attack" moves the headline number by thirty points, the attacks a guard misses are more likely to be the ones that work, and grading a jailbreak against a rewritten prompt instead of the original request makes it look more than twice as successful as it is.
 
@@ -21,7 +21,7 @@ The second is whether the misses matter. A guard that only misses attacks that w
 This paper tries to answer both. What's in it:
 1. An **attack definition that ignores content**, lined up with NIST's taxonomy, and 9,453 benchmark and traffic texts relabeled under it (§2, §4.3).
 2. A **cheap guard you can read**: 36 plain-English questions, one model call per input, 56 weights in a linear model, and a reason for every decision (§4).
-3. **Four evaluations**: a held-out benchmark test (§5.1), whether the attacks it misses actually work against nine real models (§5.2), false positives on two real chat logs (§5.3), and a head-to-head with Llama Prompt Guard 2 (§5.4, pending).
+3. **Four evaluations**: a held-out benchmark test (§5.1), whether the attacks it misses actually work against nine real models (§5.2), false positives on two real chat logs (§5.3), and a head-to-head with Llama Prompt Guard 2 (§5.4).
 4. **Things we got wrong first**, and other lessons worth knowing before you build one of these (§6).
 
 ## 2. What counts as an attack
@@ -215,33 +215,38 @@ Under guard v1.1, two LMSYS templates caused most of the false positives. One wa
 
 The WildChat attacks the guard misses mostly go to review, and some are questionable: two Spanish strings with the spaces taken out, and an Arabic letter puzzle, which the labeler counted as hiding a request. That's the transformation rule at its loosest.
 
-### 5.4 Comparison with Llama Prompt Guard 2 (pending)
+### 5.4 Comparison with Llama Prompt Guard 2
 
-**Not run yet.** We requested model access on 2026-10-27 and are waiting on Meta's approval. Everything marked TBD gets filled in once we have it.
+Llama Prompt Guard 2 [20] is the published guard closest to ours in scope. It's a small classifier fine-tuned from mDeBERTa (86M) or DeBERTa-xsmall (22M) that scores one input as benign or malicious, covering jailbreaks and explicit injection. Meta reports AUC 0.998 and 97.5% caught at a 1% FPR for the 86M model on a private benchmark, and 81.2% of attacks prevented at a 3% utility cost on AgentDojo [23]. Those are Meta's test sets and Meta's definition of an attack, so we ran both models on our data instead (`prompt_guard.py`).
 
-Llama Prompt Guard 2 [20] is the published guard closest to ours in scope. It's a small classifier fine-tuned from mDeBERTa (86M) or DeBERTa-xsmall (22M) that scores one input as benign or malicious, covering jailbreaks and explicit injection. Meta reports AUC 0.998 and 97.5% caught at a 1% FPR for the 86M model on a private benchmark, and 81.2% of attacks prevented at a 3% utility cost on AgentDojo [23]. Those are Meta's test sets and Meta's definition of an attack, so they can't be lined up against our numbers. Instead we'll run both models on our data.
-
-**Plan.** Both Prompt Guard 2 models run locally on the same test split, labels, traffic samples and replay pairs as our guard. Inputs longer than the 512-token window get split into chunks and take the highest chunk score, as Meta recommends. We'll report Meta's default threshold (0.5), the threshold that matches our 5.5% test FPR, and the catch rate at a 1% FPR for both guards.
+**Setup.** Both models run locally on the same test split, labels, traffic samples and replay pairs as our guard. Inputs longer than the 512-token window are split into chunks and take the highest chunk score, as Meta recommends; our scores match Meta's own `transformers` pipeline exactly. We report Meta's default threshold (0.5), the threshold that gives Prompt Guard the same 5.5% test FPR as our guard, and the catch rate at a 1% FPR. Both of the last two are read off the test set itself, which slightly favors whichever guard is being tuned to it. Prompt Guard's traffic flags that our run had never labeled (153 prompts) were labeled by the same Sonnet labeler; none were attacks.
 
 | | our guard (v1.2) | Prompt Guard 2 86M | Prompt Guard 2 22M |
 |---|---|---|---|
-| Test AUC | 0.985 | TBD | TBD |
-| Attacks blocked at 1% FPR | TBD | TBD | TBD |
-| Attacks blocked at 5.5% FPR | 92.9% [91.6, 94.1] | TBD | TBD |
-| At the default threshold (0.5): blocked / FPR | — | TBD | TBD |
-| Held-out sources (HackAPrompt, InjecAgent data-stealing, WildGuardMix, GCG, random search) | TBD | TBD | TBD |
-| Working attacks blocked (replay, grader refusals dropped / counted) | 86% / 93% | TBD | TBD |
-| WildChat FPR | 0.23% | TBD | TBD |
-| LMSYS FPR | 0.84% | TBD | TBD |
-| Cost per input | ~$0.0002 (one Jev call, 36 questions) | local; ~92 ms on an A100 (Meta) | local; ~19 ms on an A100 (Meta) |
+| Test AUC | **0.985** | 0.846 | 0.711 |
+| Attacks blocked at 1% FPR | **70.1%** [67.7, 72.3] | 29.8% [27.6, 32.1] | 18.7% [16.8, 20.7] |
+| Attacks blocked at 5.5% FPR | **92.9%** [91.6, 94.1] | 50.5% [48.0, 53.0] | 29.7% [27.5, 32.0] |
+| At the default threshold (0.5): blocked / FPR | — | 60.0% / 13.1% | 26.0% / 3.3% |
+| Held-out sources, attacks blocked (frozen / default) | **92.1%** | 66.5% | 26.9% |
+| Working attacks blocked (replay, grader refusals dropped / counted) | **86% / 93%** | 76% / 36% | 20% / 9% |
+| Attack success with the guard (unguarded 9.5%, refusals dropped) | **1.4%** | 2.3% | 7.6% |
+| WildChat FPR (default threshold) | **0.23%** [0.11, 0.48] | 3.75% [3.13, 4.50] | 1.24% [0.90, 1.70] |
+| LMSYS FPR (default threshold) | 0.84% [0.58, 1.27] | 5.64% [4.86, 6.54] | **0.24%** [0.12, 0.50] |
+| WildChat / LMSYS labeled attacks blocked | **12/17, 86/91** | 12/17, 74/91 | 4/17, 19/91 |
+| Cost per input | ~$0.0002 (one Jev call, 36 questions) | free, local; ~92 ms on an A100 (Meta) | free, local; ~19 ms on an A100 (Meta) |
 
-We'll also break it down by family: injection, indirect, jailbreak, obfuscation, optimization and multi-turn.
+Attacks blocked by family, our guard (frozen) vs Prompt Guard 2 86M (default threshold): direct injection 91% vs 76%, jailbreak 93% vs 84%, optimization (adversarial suffixes) 97% vs 90%, multi-turn 64% vs 48%, indirect injection 93% vs **2%**, obfuscation 100% vs **0%**.
 
-**Things to keep in mind:**
-- **Training overlap.** Prompt Guard was probably trained on some of our public sources (deepset and jackhhao, for example). We'll report results with and without them.
-- **Our labeler helps us.** Our guard was calibrated on dev labels from the same Sonnet labeler that produces the test labels, which favors us. The replay and held-out rows are the least affected.
-- **Scope.** Meta built Prompt Guard 2 for explicit techniques, so indirect injection that reads like normal instructions may be outside what it's meant to catch.
-- **Speed and cost.** Prompt Guard runs locally in milliseconds. That's a real advantage, and we'll say so.
+**What the gap is made of.**
+- **Two whole families are invisible to Prompt Guard.** It blocks almost none of the indirect injections (instructions planted in tool output, like InjecAgent's) or the encoded attacks (SORRY-Bench's Morse, ciphers and the like). That's roughly consistent with Meta's scope, explicit techniques in a single input, but those are exactly the attacks an agent sees. In the replay they're also most of the grader-refused pairs, which is why its "refusals counted" number collapses to 36%.
+- **On the attacks it was built for, it's closer but still behind.** Direct injection, jailbreaks and adversarial suffixes: 76–90% at the default threshold vs our 91–97%, at more than twice our test FPR.
+- **Part of its FPR is a different definition, not a mistake.** Its test false positives at 0.5 are mostly plain harmful requests (AdvBench: 56 of 150) and borderline-benign prompts (OR-Bench hard: 41 of 150), which our definition deliberately leaves to the downstream model. Scored against only the benign-family negatives (885 items), the gap stays: AUC 0.993 for ours, 0.871 for the 86M, 0.780 for the 22M; at a 1% FPR, 79.5% vs 21.7% vs 26.0%.
+- **Traffic.** The 86M model wrongly blocks 3.75% of WildChat and 5.6% of LMSYS first turns, 16× and 7× our rates. The 22M model is the quietest guard on LMSYS (0.24%) but catches only 19 of its 91 labeled attacks.
+
+**Caveats.**
+- **Training overlap.** Prompt Guard was probably trained on some of our public sources (deepset, jackhhao). Dropping them barely moves its AUC (0.846 → 0.840), so overlap isn't helping it much here.
+- **Our labeler helps us.** Our guard was calibrated on dev labels from the same Sonnet labeler that produces the test labels. The replay rows, where success is checked against the target's reply, and the held-out sources are the least affected, and the gap holds there.
+- **Speed and cost.** Prompt Guard runs locally in milliseconds for free. Ours needs a network call to Jev per input. For a deployment that only faces direct jailbreaks and can tolerate a few percent false positives, that trade may be worth it.
 
 ## 6. What we learned
 
@@ -269,7 +274,7 @@ The whole project, end to end, cost about $93. Running the guard costs one Jev c
 
 | item | spend |
 |---|---|
-| Anthropic (Sonnet 5.5: labeling, audits, replay grading, pilots) | **$73.25** ($49.91 before the NIST relabel, $19.46 for it, $3.88 for the suffix replay) |
+| Anthropic (Sonnet 5.5: labeling, audits, replay grading, pilots) | **≈ $74** ($49.91 before the NIST relabel, $19.46 for it, $3.88 for the suffix replay, ~$0.8 labeling Prompt Guard's traffic flags) |
 | of which: first full relabel, 7,188 texts (Batches API, half price) | ~$12.5 |
 | of which: NIST-aligned relabel, 8,810 texts (Batches API) plus pilots | ~$17 |
 | of which: replay grading | ~$24.6 |
