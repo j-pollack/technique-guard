@@ -32,14 +32,17 @@ from pathlib import Path
 DATA = Path(__file__).with_name("data")
 DATASETS = Path(__file__).with_name("datasets")  # raw rows per source; delete a file to re-pull it
 POOL = DATA / "pool.jsonl"
-HELD_OUT = {"hackaprompt", "injecagent_ds", "wildguard", "xstest_safe"}  # one per major family, never tuned on
+HELD_OUT = {"hackaprompt", "injecagent_ds", "wildguard", "xstest_safe",  # one per major family, never tuned on
+            "jbb_gcg", "jbb_random_search", "jbb_pair"}  # NIST AI 100-2e2025 optimization-based and automated attacks
 NEAR_DUP = 0.6
 FETCH_CAP = 500  # rows pulled per source before sampling (applies on first pull only)
 rng = random.Random(0)  # page sampling on first pull
 
 
 def get(url: str, tries: int = 5):
-    headers = {"Authorization": f"Bearer {os.environ['HF_TOKEN']}"} if os.environ.get("HF_TOKEN") else {}
+    # GitHub answers 404 to a foreign bearer token, so send the HF token to Hugging Face only.
+    hf_host = urllib.parse.urlparse(url).hostname.endswith("huggingface.co")
+    headers = {"Authorization": f"Bearer {os.environ['HF_TOKEN']}"} if os.environ.get("HF_TOKEN") and hf_host else {}
     for attempt in range(tries):
         try:
             return urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=60)
@@ -109,7 +112,15 @@ def sorry(r: dict):
 
 TT = "https://huggingface.co/datasets/qxcv/tensor-trust/resolve/main/benchmarks"
 INJECAGENT = "https://raw.githubusercontent.com/uiuc-kang-lab/InjecAgent/main/data"
-WJ = ("allenai/wildjailbreak", "eval", "train")  # the "train" config fails to parse on HF's side
+WJ = ("allenai/wildjailbreak", "eval", "train")
+JBB = "https://raw.githubusercontent.com/JailbreakBench/artifacts/main/attack-artifacts"
+
+
+def jbb(method: str, *runs: str):
+    """JailbreakBench attack artifacts: one prompt per behavior per target model."""
+    for run in runs:
+        with get(f"{JBB}/{method}/{run}.json") as resp:
+            yield from json.load(resp)["jailbreaks"]  # the "train" config fails to parse on HF's side
 
 # (source, () -> rows, row -> (text, label, family) or None to skip). label 1 = attack.
 SOURCES = [
@@ -150,6 +161,15 @@ SOURCES = [
     ("strongreject", lambda: hf("walledai/StrongREJECT", "default", "train"), lambda r: (r["prompt"], 0, "harmful_plain")),
     ("xstest_safe", lambda: hf("Paul/XSTest", "default", "train"), lambda r: (r["prompt"], 0, "benign") if r["label"] == "safe" else None),
     ("orbench_hard", lambda: hf("bench-llm/or-bench", "or-bench-hard-1k", "train"), lambda r: (r["prompt"], 0, "benign")),
+    # Optimization-based attacks (NIST AI 100-2e2025 3.3.1): GCG adversarial suffixes, and a refusal-suppressing
+    # template plus random-search suffix. PAIR is automated model-based red teaming. Test only.
+    ("jbb_gcg", lambda: jbb("GCG", "white_box/vicuna-13b-v1.5", "white_box/llama-2-7b-chat-hf",
+                             "transfer/gpt-3.5-turbo-1106", "transfer/gpt-4-0125-preview"), lambda r: (r["prompt"], 1, "optimization")),
+    ("jbb_random_search", lambda: jbb("prompt_with_random_search", *(f"black_box/{m}" for m in
+                                      ("vicuna-13b-v1.5", "llama-2-7b-chat-hf", "gpt-3.5-turbo-1106", "gpt-4-0125-preview"))),
+     lambda r: (r["prompt"], 1, "optimization")),
+    ("jbb_pair", lambda: jbb("PAIR", *(f"black_box/{m}" for m in ("vicuna-13b-v1.5", "llama-2-7b-chat-hf", "gpt-3.5-turbo-1106", "gpt-4-0125-preview"))),
+     lambda r: (r["prompt"], 1, "jailbreak")),
 ]
 
 

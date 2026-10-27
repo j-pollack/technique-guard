@@ -71,12 +71,12 @@ def label_all(items: list[dict]) -> dict:
     LABELS (traffic_labels.jsonl) holds the earlier policy-definition labels and is no longer written."""
     import anthropic
     import audit
-    audit.client = anthropic.Anthropic()
+    audit.client = anthropic.Anthropic(max_retries=8)  # SDK backs off on 429/529; more retries = slower, not failed
     done = ({r["text"]: r for r in map(json.loads, audit.TECHNIQUE.read_text().splitlines()) if r.get("def") == audit.DEF}
             if audit.TECHNIQUE.exists() else {})
     todo = [i for i in items if i["text"] not in done]
     print(f"Sonnet labels needed: {len(todo)}")
-    with ThreadPoolExecutor(6) as pool, audit.TECHNIQUE.open("a", buffering=1) as out:
+    with ThreadPoolExecutor(16) as pool, audit.TECHNIQUE.open("a", buffering=1) as out:
         futures = {pool.submit(audit.label, i["text"], audit.MODEL, audit.SYSTEM_TECHNIQUE): i for i in todo}
         for f in as_completed(futures):
             row = {"text": futures[f]["text"], "def": audit.DEF, **f.result()}
