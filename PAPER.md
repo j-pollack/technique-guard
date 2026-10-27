@@ -65,7 +65,13 @@ Older definitions key off outcome or content instead. OWASP [31] and NIST's own 
 | Automated red teaming (PAIR, TAP) | attack only if the generated prompt uses a technique above; persuasion and fiction outputs are not |
 | Knowledge-base poisoning (false facts, no instructions) | out of scope: needs a fact check, not an input screen |
 
-**Why ignore content.** NIST itself points out that the tricks for getting around a model's restrictions are the same whatever the misuse, and can be described "without specificity as to the particular kinds of misuse" [30, §3.1.2]. We take that at face value. Whether a request should be answered is up to the downstream model and its provider, and the model sees the request either way. Telling a "fiction wrapper used for evasion" apart from fiction means judging what the fiction asks for, so in our definition framing on its own is never an attack. The trade-off is real: clearly harmful requests wrapped only in fiction, persuasion or translation go straight through to the model (§6, §7).
+**Why ignore content.** Two reasons.
+
+First, deciding what a model should answer is already someone else's job. The downstream model has its own refusal training and its provider has a content policy. The guard sits in front of them, not in place of them. If a request is harmful, the model sees it either way and can say no. The guard's job is narrower: stop text that tries to take that decision away from the model. NIST draws the same line, describing the techniques separately from the kinds of misuse they're used for [30, §3.1.2].
+
+Second, you can't judge a wrapper without judging what's inside it. "Write a story where a chemist explains…" is fiction or evasion depending entirely on what the chemist explains. A guard that tries to tell the two apart has turned into a content filter. So in our definition, framing on its own (fiction, role-play, persuasion, another language) is never an attack.
+
+The cost is that a clearly harmful request wrapped only in fiction, persuasion or translation goes straight through, and refusing it is up to the model (§6, §7).
 
 ## 3. Related work
 
