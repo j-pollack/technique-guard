@@ -89,7 +89,9 @@ The cost is that a clearly harmful request wrapped only in fiction, persuasion o
 
 ### 4.1 Data
 
-We pulled 25 public sources (Appendix B) and split each one into **dev**, for tuning, and **test**, reported once. The split goes by a hash of near-duplicate groups, so templated attacks can't land on both sides. A group is the same SORRY-Bench question, the same MHJ behavior, or texts within a source whose word-trigram overlap (Jaccard) is at least 0.6.
+We pulled 25 public sources (Appendix B) and split each one in two: **dev**, which we tuned on, and **test**, which we scored once at the end.
+
+Attack datasets are full of near-copies: the same jailbreak template with a different request pasted in, or the same question rewritten five ways. If one copy lands in dev and another in test, the test score partly measures memorization. So we group near-copies first and send each group wholly to one side. Texts share a group if they come from the same SORRY-Bench question or the same MHJ behavior, or if most of their wording matches (at least 60% of their three-word sequences in common, i.e. word-trigram Jaccard ≥ 0.6). A hash of the group decides its side, so the split is the same on every run.
 
 Seven sources never appear in dev at all: HackAPrompt, InjecAgent data-stealing, WildGuardMix, XSTest-safe, and three JailbreakBench attack sets [22] we added to cover NIST's optimization-based and automated attacks. Those three are GCG adversarial suffixes, a refusal-suppressing template with a random-search suffix, and PAIR. We take up to 150 items per source and family per split, which gives 2,879 dev items and 4,266 test items.
 
