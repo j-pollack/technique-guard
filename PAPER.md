@@ -216,31 +216,59 @@ Traffic: allenai/WildChat-1M [24], lmsys/lmsys-chat-1m [25] (first user turns).
 ## References
 
 [1] Perez, Ribeiro. Ignore Previous Prompt: Attack Techniques for Language Models. NeurIPS 2022 ML Safety Workshop; arXiv:2211.09527.
+
 [2] Greshake et al. Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection. AISec '23 (ACM CCS Workshop) 2023.
+
 [3] Liu et al. Formalizing and Benchmarking Prompt Injection Attacks and Defenses. USENIX Security 2024.
+
 [4] Wei, Haghtalab, Steinhardt. Jailbroken: How Does LLM Safety Training Fail? NeurIPS 2023.
+
 [5] Zou et al. Universal and Transferable Adversarial Attacks on Aligned Language Models. arXiv:2307.15043, 2023.
+
 [6] Zeng et al. How Johnny Can Persuade LLMs to Jailbreak Them: Rethinking Persuasion to Challenge AI Safety by Humanizing LLMs. ACL 2024.
+
 [7] Li et al. LLM Defenses Are Not Robust to Multi-Turn Human Jailbreaks Yet. NeurIPS 2024 Red Teaming GenAI Workshop; arXiv:2408.15221.
+
 [8] Mazeika et al. HarmBench: A Standardized Evaluation Framework for Automated Red Teaming and Robust Refusal. ICML 2024.
+
 [9] Souly et al. A StrongREJECT for Empty Jailbreaks. NeurIPS 2024 Datasets and Benchmarks.
+
 [10] Xie et al. SORRY-Bench: Systematically Evaluating Large Language Model Safety Refusal. ICLR 2025.
+
 [11] Cui et al. OR-Bench: An Over-Refusal Benchmark for Large Language Models. ICML 2025.
+
 [12] Röttger et al. XSTest: A Test Suite for Identifying Exaggerated Safety Behaviours in Large Language Models. NAACL 2024.
+
 [13] Shen et al. "Do Anything Now": Characterizing and Evaluating In-The-Wild Jailbreak Prompts on Large Language Models. CCS 2024.
+
 [14] Jiang et al. WildTeaming at Scale: From In-the-Wild Jailbreaks to (Adversarially) Safer Language Models. NeurIPS 2024.
+
 [15] Han et al. WildGuard: Open One-Stop Moderation Tools for Safety Risks, Jailbreaks, and Refusals of LLMs. NeurIPS 2024 Datasets and Benchmarks.
+
 [16] Schulhoff et al. Ignore This Title and HackAPrompt: Exposing Systemic Vulnerabilities of LLMs through a Global Scale Prompt Hacking Competition. EMNLP 2023.
+
 [17] Toyer et al. Tensor Trust: Interpretable Prompt Injection Attacks from an Online Game. ICLR 2024.
+
 [18] Zhan et al. InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents. Findings of ACL 2024.
+
 [19] Inan et al. Llama Guard: LLM-based Input-Output Safeguard for Human-AI Conversations. arXiv:2312.06674, 2023.
+
 [20] Meta. Prompt Guard 86M (model card). Hugging Face meta-llama/Prompt-Guard-86M, 2024.
+
 [21] Sharma et al. Constitutional Classifiers: Defending against Universal Jailbreaks across Thousands of Hours of Red Teaming. arXiv:2501.18837, 2025.
+
 [22] Chao et al. JailbreakBench: An Open Robustness Benchmark for Jailbreaking Large Language Models. NeurIPS 2024 Datasets and Benchmarks.
+
 [23] Debenedetti et al. AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents. NeurIPS 2024 Datasets and Benchmarks.
+
 [24] Zhao et al. WildChat: 1M ChatGPT Interaction Logs in the Wild. ICLR 2024.
+
 [25] Zheng et al. LMSYS-Chat-1M: A Large-Scale Real-World LLM Conversation Dataset. ICLR 2024.
+
 [26] Pfister et al. Gandalf the Red: Adaptive Security for LLMs. ICML 2025; arXiv:2501.07927.
+
 [27] deepset. prompt-injections (dataset). huggingface.co/datasets/deepset/prompt-injections, 2023.
+
 [28] Hao. jailbreak-classification (dataset). huggingface.co/datasets/jackhhao/jailbreak-classification, 2023.
+
 [29] xTRam1. safe-guard-prompt-injection (dataset). huggingface.co/datasets/xTRam1/safe-guard-prompt-injection, 2024.
