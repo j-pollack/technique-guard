@@ -12,6 +12,7 @@ STYLE = """<style>
   @media (prefers-color-scheme: dark) { svg { --bar: #3987e5; --bar2: #d95926; --ink: #f0efec; --muted: #c3c2b7; --grid: #3a3936; } }
   text { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--ink); }
   .muted { fill: var(--muted); font-size: 12px; }
+  .hdr { font-size: 10.5px; }
   .title { font-weight: 600; font-size: 14px; }
   .bar { fill: var(--bar); }
   .bar2 { fill: var(--bar2); }
@@ -111,8 +112,8 @@ def heatmap(x0, y0, label_w, col, idx, title):
     out = [f'<text class="title" x="{x0}" y="{y0 + 14}">{title}</text>']
     for j, (a, b) in enumerate(SHORT):
         cx = x0 + label_w + j * col + col / 2
-        out.append(f'<text class="muted" x="{cx}" y="{y0 + 32}" text-anchor="middle">{a}</text>')
-        out.append(f'<text class="muted" x="{cx}" y="{y0 + 46}" text-anchor="middle">{b}</text>')
+        out.append(f'<text class="muted hdr" x="{cx}" y="{y0 + 32}" text-anchor="middle">{a}</text>')
+        out.append(f'<text class="muted hdr" x="{cx}" y="{y0 + 46}" text-anchor="middle">{b}</text>')
     for i, row in enumerate(FAMILY_SUCCESS):
         y = y0 + top + i * row_h
         out.append(f'<text x="{x0 + label_w - 10}" y="{y + 17}" text-anchor="end">{row[0]}</text>')

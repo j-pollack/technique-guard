@@ -368,22 +368,41 @@ Traffic: allenai/WildChat-1M [24], lmsys/lmsys-chat-1m [25] (first user turns).
 | GLM 5.3 | 13.1% | 1.7% |
 | **all** | **9.5%** | **1.4%** |
 
-**Figure 4: share of replayed attacks that succeed, by family and target** (% without the guard → with it, graded pairs in brackets; grader refusals dropped; weighted to the test set).
+**Figure 4: share of replayed attacks that succeed (%), by family and target** (grader refusals dropped; weighted to the test set; "–" means no gradeable replies).
+
+Without the guard:
 
 | family | Grok 4.7 | Qwen Max | Qwen Flash | Gemini Argon | Gemini 3.8 Flash | DeepSeek V4.1 Flash | DeepSeek V4 Pro | GLM 5.3 Flash | GLM 5.3 |
-|---|---|---|---|---|---|---|---|---|---|
-| HackAPrompt | 0 → 0 (31) | 16 → 6.8 (31) | 26.4 → 7.2 (30) | 6.1 → 1.5 (31) | 16 → 6.8 (31) | 25.2 → 6.8 (31) | 20.6 → 6.8 (31) | 39.7 → 7.6 (31) | 39.7 → 12.2 (31) |
-| Tensor Trust hijack | 0 → 0 (24) | 1.7 → 1.7 (24) | 11.5 → 0.9 (23) | 0 → 0 (24) | 5.9 → 0.8 (24) | 0.8 → 0.8 (24) | 1.7 → 1.7 (24) | 0.8 → 0.8 (24) | 5.9 → 0.8 (24) |
-| Tensor Trust extract | 0 → 0 (32) | 9.9 → 0 (32) | 14.6 → 0 (29) | 16.4 → 3.3 (32) | 9.9 → 0 (32) | 13.1 → 0 (32) | 13.1 → 0 (32) | 16.4 → 0 (32) | 20.4 → 0.7 (32) |
-| InjecAgent direct harm | 0 → 0 (25) | 0 → 0 (25) | 0 → 0 (25) | 0 → 0 (25) | 0 → 0 (25) | 0 → 0 (25) | 11.3 → 0.8 (25) | 0 → 0 (25) | 5.2 → 0 (25) |
-| InjecAgent data stealing | 2.7 → 0 (38) | 0 → 0 (38) | 0 → 0 (38) | 0 → 0 (38) | 0 → 0 (38) | 0 → 0 (38) | 3.4 → 0.7 (38) | 2.7 → 0 (38) | 0 → 0 (38) |
-| WildGuardMix jailbreak | 8.6 → 8.6 (15) | 0 → 0 (15) | 7 → 7 (15) | 22.7 → 8.6 (15) | 21.1 → 7 (15) | 8.6 → 8.6 (15) | 15.6 → 8.6 (15) | 7 → 0 (15) | 7 → 0 (15) |
-| WildJailbreak adversarial | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) |
-| MHJ multi-turn (3–4 per cell) | 0 → 0 (4) | 0 → 0 (4) | 47.1 → 0 (3) | 64 → 0 (4) | 47.1 → 0 (3) | 32 → 0 (4) | 64 → 0 (4) | 0 → 0 (4) | 0 → 0 (3) |
-| SORRY encodings | – | – | – | 0 → 0 (5) | 4.2 → 0 (24) | – | – | 0 → 0 (1) | – |
-| GCG suffixes | 0 → 0 (32) | 3.1 → 0 (32) | 3.2 → 0 (31) | 9.4 → 3.1 (32) | 6.2 → 3.1 (32) | 9.7 → 0 (31) | 9.4 → 0 (32) | 9.4 → 0 (32) | 9.4 → 0 (32) |
-| Random-search suffixes | 0 → 0 (38) | 2.6 → 0 (38) | 0 → 0 (33) | 2.6 → 0 (38) | 2.7 → 0 (37) | 14.3 → 0 (35) | 83.3 → 0 (36) | 44.7 → 0 (38) | 18.4 → 0 (38) |
+|------------------------|-------|-------|-------|-------|-------|-------|-------|-------|-------|
+| HackAPrompt | 0 | 16 | 26.4 | 6.1 | 16 | 25.2 | 20.6 | 39.7 | 39.7 |
+| Tensor Trust hijack | 0 | 1.7 | 11.5 | 0 | 5.9 | 0.8 | 1.7 | 0.8 | 5.9 |
+| Tensor Trust extract | 0 | 9.9 | 14.6 | 16.4 | 9.9 | 13.1 | 13.1 | 16.4 | 20.4 |
+| InjecAgent direct harm | 0 | 0 | 0 | 0 | 0 | 0 | 11.3 | 0 | 5.2 |
+| InjecAgent data stealing | 2.7 | 0 | 0 | 0 | 0 | 0 | 3.4 | 2.7 | 0 |
+| WildGuardMix jailbreak | 8.6 | 0 | 7 | 22.7 | 21.1 | 8.6 | 15.6 | 7 | 7 |
+| WildJailbreak adversarial | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| MHJ multi-turn (3–4 per cell) | 0 | 0 | 47.1 | 64 | 47.1 | 32 | 64 | 0 | 0 |
+| SORRY encodings | – | – | – | 0 | 4.2 | – | – | 0 | – |
+| GCG suffixes | 0 | 3.1 | 3.2 | 9.4 | 6.2 | 9.7 | 9.4 | 9.4 | 9.4 |
+| Random-search suffixes | 0 | 2.6 | 0 | 2.6 | 2.7 | 14.3 | 83.3 | 44.7 | 18.4 |
 
+With the guard:
+
+| family | Grok 4.7 | Qwen Max | Qwen Flash | Gemini Argon | Gemini 3.8 Flash | DeepSeek V4.1 Flash | DeepSeek V4 Pro | GLM 5.3 Flash | GLM 5.3 |
+|------------------------|-------|-------|-------|-------|-------|-------|-------|-------|-------|
+| HackAPrompt | 0 | 6.8 | 7.2 | 1.5 | 6.8 | 6.8 | 6.8 | 7.6 | 12.2 |
+| Tensor Trust hijack | 0 | 1.7 | 0.9 | 0 | 0.8 | 0.8 | 1.7 | 0.8 | 0.8 |
+| Tensor Trust extract | 0 | 0 | 0 | 3.3 | 0 | 0 | 0 | 0 | 0.7 |
+| InjecAgent direct harm | 0 | 0 | 0 | 0 | 0 | 0 | 0.8 | 0 | 0 |
+| InjecAgent data stealing | 0 | 0 | 0 | 0 | 0 | 0 | 0.7 | 0 | 0 |
+| WildGuardMix jailbreak | 8.6 | 0 | 7 | 8.6 | 7 | 8.6 | 8.6 | 0 | 0 |
+| WildJailbreak adversarial | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| MHJ multi-turn (3–4 per cell) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| SORRY encodings | – | – | – | 0 | 0 | – | – | 0 | – |
+| GCG suffixes | 0 | 0 | 0 | 3.1 | 3.1 | 0 | 0 | 0 | 0 |
+| Random-search suffixes | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+Graded pairs per cell: HackAPrompt 30–31, Tensor Trust hijack 23–24, Tensor Trust extract 29–32, InjecAgent direct harm 25, InjecAgent data stealing 38, WildGuardMix jailbreak 15, WildJailbreak adversarial 5, MHJ multi-turn 3–4, SORRY encodings 1–24, GCG suffixes 31–32, Random-search suffixes 33–38.
 
 ## References
 

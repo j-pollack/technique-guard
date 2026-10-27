@@ -3,6 +3,7 @@
   @media (prefers-color-scheme: dark) { svg { --bar: #3987e5; --bar2: #d95926; --ink: #f0efec; --muted: #c3c2b7; --grid: #3a3936; } }
   text { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--ink); }
   .muted { fill: var(--muted); font-size: 12px; }
+  .hdr { font-size: 10.5px; }
   .title { font-weight: 600; font-size: 14px; }
   .bar { fill: var(--bar); }
   .bar2 { fill: var(--bar2); }
@@ -38,24 +39,24 @@
   }
 </style>
 <text class="title" x="0" y="14">Without the guard: % of attacks that succeed</text>
-<text class="muted" x="229.0" y="32" text-anchor="middle">Grok</text>
-<text class="muted" x="229.0" y="46" text-anchor="middle">4.7</text>
-<text class="muted" x="287.0" y="32" text-anchor="middle">Qwen</text>
-<text class="muted" x="287.0" y="46" text-anchor="middle">Max</text>
-<text class="muted" x="345.0" y="32" text-anchor="middle">Qwen</text>
-<text class="muted" x="345.0" y="46" text-anchor="middle">Flash</text>
-<text class="muted" x="403.0" y="32" text-anchor="middle">Gemini</text>
-<text class="muted" x="403.0" y="46" text-anchor="middle">Argon</text>
-<text class="muted" x="461.0" y="32" text-anchor="middle">Gemini</text>
-<text class="muted" x="461.0" y="46" text-anchor="middle">3.8 Flash</text>
-<text class="muted" x="519.0" y="32" text-anchor="middle">DeepSeek</text>
-<text class="muted" x="519.0" y="46" text-anchor="middle">V4.1 Flash</text>
-<text class="muted" x="577.0" y="32" text-anchor="middle">DeepSeek</text>
-<text class="muted" x="577.0" y="46" text-anchor="middle">V4 Pro</text>
-<text class="muted" x="635.0" y="32" text-anchor="middle">GLM</text>
-<text class="muted" x="635.0" y="46" text-anchor="middle">5.3 Flash</text>
-<text class="muted" x="693.0" y="32" text-anchor="middle">GLM</text>
-<text class="muted" x="693.0" y="46" text-anchor="middle">5.3</text>
+<text class="muted hdr" x="229.0" y="32" text-anchor="middle">Grok</text>
+<text class="muted hdr" x="229.0" y="46" text-anchor="middle">4.7</text>
+<text class="muted hdr" x="287.0" y="32" text-anchor="middle">Qwen</text>
+<text class="muted hdr" x="287.0" y="46" text-anchor="middle">Max</text>
+<text class="muted hdr" x="345.0" y="32" text-anchor="middle">Qwen</text>
+<text class="muted hdr" x="345.0" y="46" text-anchor="middle">Flash</text>
+<text class="muted hdr" x="403.0" y="32" text-anchor="middle">Gemini</text>
+<text class="muted hdr" x="403.0" y="46" text-anchor="middle">Argon</text>
+<text class="muted hdr" x="461.0" y="32" text-anchor="middle">Gemini</text>
+<text class="muted hdr" x="461.0" y="46" text-anchor="middle">3.8 Flash</text>
+<text class="muted hdr" x="519.0" y="32" text-anchor="middle">DeepSeek</text>
+<text class="muted hdr" x="519.0" y="46" text-anchor="middle">V4.1 Flash</text>
+<text class="muted hdr" x="577.0" y="32" text-anchor="middle">DeepSeek</text>
+<text class="muted hdr" x="577.0" y="46" text-anchor="middle">V4 Pro</text>
+<text class="muted hdr" x="635.0" y="32" text-anchor="middle">GLM</text>
+<text class="muted hdr" x="635.0" y="46" text-anchor="middle">5.3 Flash</text>
+<text class="muted hdr" x="693.0" y="32" text-anchor="middle">GLM</text>
+<text class="muted hdr" x="693.0" y="46" text-anchor="middle">5.3</text>
 <text x="190" y="69" text-anchor="end">HackAPrompt</text>
 <text class="muted" x="229.0" y="69" text-anchor="middle">0</text>
 <rect class="h3" x="259" y="53" width="56" height="24" rx="2"/>
@@ -224,24 +225,24 @@
 <rect class="h3" x="665" y="313" width="56" height="24" rx="2"/>
 <text class="t3" x="693.0" y="329" text-anchor="middle">18</text>
 <text class="title" x="0" y="376">With the guard</text>
-<text class="muted" x="229.0" y="394" text-anchor="middle">Grok</text>
-<text class="muted" x="229.0" y="408" text-anchor="middle">4.7</text>
-<text class="muted" x="287.0" y="394" text-anchor="middle">Qwen</text>
-<text class="muted" x="287.0" y="408" text-anchor="middle">Max</text>
-<text class="muted" x="345.0" y="394" text-anchor="middle">Qwen</text>
-<text class="muted" x="345.0" y="408" text-anchor="middle">Flash</text>
-<text class="muted" x="403.0" y="394" text-anchor="middle">Gemini</text>
-<text class="muted" x="403.0" y="408" text-anchor="middle">Argon</text>
-<text class="muted" x="461.0" y="394" text-anchor="middle">Gemini</text>
-<text class="muted" x="461.0" y="408" text-anchor="middle">3.8 Flash</text>
-<text class="muted" x="519.0" y="394" text-anchor="middle">DeepSeek</text>
-<text class="muted" x="519.0" y="408" text-anchor="middle">V4.1 Flash</text>
-<text class="muted" x="577.0" y="394" text-anchor="middle">DeepSeek</text>
-<text class="muted" x="577.0" y="408" text-anchor="middle">V4 Pro</text>
-<text class="muted" x="635.0" y="394" text-anchor="middle">GLM</text>
-<text class="muted" x="635.0" y="408" text-anchor="middle">5.3 Flash</text>
-<text class="muted" x="693.0" y="394" text-anchor="middle">GLM</text>
-<text class="muted" x="693.0" y="408" text-anchor="middle">5.3</text>
+<text class="muted hdr" x="229.0" y="394" text-anchor="middle">Grok</text>
+<text class="muted hdr" x="229.0" y="408" text-anchor="middle">4.7</text>
+<text class="muted hdr" x="287.0" y="394" text-anchor="middle">Qwen</text>
+<text class="muted hdr" x="287.0" y="408" text-anchor="middle">Max</text>
+<text class="muted hdr" x="345.0" y="394" text-anchor="middle">Qwen</text>
+<text class="muted hdr" x="345.0" y="408" text-anchor="middle">Flash</text>
+<text class="muted hdr" x="403.0" y="394" text-anchor="middle">Gemini</text>
+<text class="muted hdr" x="403.0" y="408" text-anchor="middle">Argon</text>
+<text class="muted hdr" x="461.0" y="394" text-anchor="middle">Gemini</text>
+<text class="muted hdr" x="461.0" y="408" text-anchor="middle">3.8 Flash</text>
+<text class="muted hdr" x="519.0" y="394" text-anchor="middle">DeepSeek</text>
+<text class="muted hdr" x="519.0" y="408" text-anchor="middle">V4.1 Flash</text>
+<text class="muted hdr" x="577.0" y="394" text-anchor="middle">DeepSeek</text>
+<text class="muted hdr" x="577.0" y="408" text-anchor="middle">V4 Pro</text>
+<text class="muted hdr" x="635.0" y="394" text-anchor="middle">GLM</text>
+<text class="muted hdr" x="635.0" y="408" text-anchor="middle">5.3 Flash</text>
+<text class="muted hdr" x="693.0" y="394" text-anchor="middle">GLM</text>
+<text class="muted hdr" x="693.0" y="408" text-anchor="middle">5.3</text>
 <text x="190" y="431" text-anchor="end">HackAPrompt</text>
 <text class="muted" x="229.0" y="431" text-anchor="middle">0</text>
 <rect class="h1" x="259" y="415" width="56" height="24" rx="2"/>

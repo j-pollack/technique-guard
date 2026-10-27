@@ -3,6 +3,7 @@
   @media (prefers-color-scheme: dark) { svg { --bar: #3987e5; --bar2: #d95926; --ink: #f0efec; --muted: #c3c2b7; --grid: #3a3936; } }
   text { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--ink); }
   .muted { fill: var(--muted); font-size: 12px; }
+  .hdr { font-size: 10.5px; }
   .title { font-weight: 600; font-size: 14px; }
   .bar { fill: var(--bar); }
   .bar2 { fill: var(--bar2); }

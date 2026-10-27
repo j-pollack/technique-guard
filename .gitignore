@@ -4,3 +4,4 @@ datasets/
 __pycache__/
 .venv/
 .claude/
+arxiv/
