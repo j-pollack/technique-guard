@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 260" width="680" height="260" role="img"><title>Share of test non-attacks the guard blocks, by group</title><style>
+  svg { --bar: #2a78d6; --ink: #0b0b0b; --muted: #52514e; --grid: #e4e3df; }
+  @media (prefers-color-scheme: dark) { svg { --bar: #3987e5; --ink: #f0efec; --muted: #c3c2b7; --grid: #3a3936; } }
+  text { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--ink); }
+  .muted { fill: var(--muted); font-size: 12px; }
+  .title { font-weight: 600; font-size: 14px; }
+  .bar { fill: var(--bar); }
+  .ci { stroke: var(--ink); stroke-width: 1.5; }
+  .grid { stroke: var(--grid); stroke-width: 1; }
+</style>
+<text class="title" x="0" y="14">Non-attacks wrongly blocked, by group (95% CI)</text>
+<line class="grid" x1="250.0" x2="250.0" y1="24" y2="236"/>
+<text class="muted" x="250.0" y="252" text-anchor="middle">0%</text>
+<line class="grid" x1="322.0" x2="322.0" y1="24" y2="236"/>
+<text class="muted" x="322.0" y="252" text-anchor="middle">10%</text>
+<line class="grid" x1="394.0" x2="394.0" y1="24" y2="236"/>
+<text class="muted" x="394.0" y="252" text-anchor="middle">20%</text>
+<line class="grid" x1="466.0" x2="466.0" y1="24" y2="236"/>
+<text class="muted" x="466.0" y="252" text-anchor="middle">30%</text>
+<line class="grid" x1="538.0" x2="538.0" y1="24" y2="236"/>
+<text class="muted" x="538.0" y="252" text-anchor="middle">40%</text>
+<line class="grid" x1="610.0" x2="610.0" y1="24" y2="236"/>
+<text class="muted" x="610.0" y="252" text-anchor="middle">50%</text>
+<text x="240" y="40" text-anchor="end">All non-attacks</text>
+<path class="bar" d="M250.0,28 h35.6 q4,0 4,4 v6 q0,4 -4,4 h-35.6 z"/>
+<line class="ci" x1="283.1" x2="296.1" y1="35.0" y2="35.0"/>
+<text class="muted" x="302.1" y="40">5.5%</text>
+<text x="240" y="66" text-anchor="end">Benign</text>
+<path class="bar" d="M250.0,54 h14.0 q4,0 4,4 v6 q0,4 -4,4 h-14.0 z"/>
+<line class="ci" x1="261.5" x2="276.6" y1="61.0" y2="61.0"/>
+<text class="muted" x="282.6" y="66">2.5%</text>
+<text x="240" y="92" text-anchor="end">Plain harmful requests</text>
+<rect class="bar" x="250.0" y="80" width="0.0" height="14"/>
+<line class="ci" x1="250.0" x2="254.3" y1="87.0" y2="87.0"/>
+<text class="muted" x="260.3" y="92">0%</text>
+<text x="240" y="118" text-anchor="end">Persuasion / role-play / translation</text>
+<rect class="bar" x="250.0" y="106" width="2.2" height="14"/>
+<line class="ci" x1="250.0" x2="260.8" y1="113.0" y2="113.0"/>
+<text class="muted" x="266.8" y="118">0.3%</text>
+<text x="240" y="144" text-anchor="end">PAIR prompts</text>
+<rect class="bar" x="250.0" y="132" width="0.0" height="14"/>
+<line class="ci" x1="250.0" x2="270.2" y1="139.0" y2="139.0"/>
+<text class="muted" x="276.2" y="144">0%</text>
+<text x="240" y="170" text-anchor="end">Jailbreak-styled, not attacks</text>
+<path class="bar" d="M250.0,158 h164.5 q4,0 4,4 v6 q0,4 -4,4 h-164.5 z"/>
+<line class="ci" x1="378.2" x2="467.4" y1="165.0" y2="165.0"/>
+<text class="muted" x="473.4" y="170">23.4%</text>
+<text x="240" y="196" text-anchor="end">Injection-styled, not attacks</text>
+<path class="bar" d="M250.0,184 h271.8 q4,0 4,4 v6 q0,4 -4,4 h-271.8 z"/>
+<line class="ci" x1="473.9" x2="580.5" y1="191.0" y2="191.0"/>
+<text class="muted" x="586.5" y="196">38.3%</text>
+<text x="240" y="222" text-anchor="end">Multi-turn, not attacks</text>
+<path class="bar" d="M250.0,210 h73.8 q4,0 4,4 v6 q0,4 -4,4 h-73.8 z"/>
+<line class="ci" x1="296.1" x2="377.4" y1="217.0" y2="217.0"/>
+<text class="muted" x="383.4" y="222">10.8%</text>
+</svg>

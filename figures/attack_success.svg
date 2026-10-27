@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 312" width="680" height="312" role="img"><title>Share of replayed attacks that succeed per target model, without and with the guard</title><style>
+  svg { --bar: #2a78d6; --ink: #0b0b0b; --muted: #52514e; --grid: #e4e3df; }
+  @media (prefers-color-scheme: dark) { svg { --bar: #3987e5; --ink: #f0efec; --muted: #c3c2b7; --grid: #3a3936; } }
+  text { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--ink); }
+  .muted { fill: var(--muted); font-size: 12px; }
+  .title { font-weight: 600; font-size: 14px; }
+  .bar { fill: var(--bar); }
+  .ci { stroke: var(--ink); stroke-width: 1.5; }
+  .grid { stroke: var(--grid); stroke-width: 1; }
+</style>
+<text class="title" x="0" y="14">Without the guard</text>
+<line class="grid" x1="140.0" x2="140.0" y1="24" y2="288"/>
+<text class="muted" x="140.0" y="304" text-anchor="middle">0%</text>
+<line class="grid" x1="182.0" x2="182.0" y1="24" y2="288"/>
+<text class="muted" x="182.0" y="304" text-anchor="middle">5%</text>
+<line class="grid" x1="224.0" x2="224.0" y1="24" y2="288"/>
+<text class="muted" x="224.0" y="304" text-anchor="middle">10%</text>
+<line class="grid" x1="266.0" x2="266.0" y1="24" y2="288"/>
+<text class="muted" x="266.0" y="304" text-anchor="middle">15%</text>
+<line class="grid" x1="308.0" x2="308.0" y1="24" y2="288"/>
+<text class="muted" x="308.0" y="304" text-anchor="middle">20%</text>
+<line class="grid" x1="350.0" x2="350.0" y1="24" y2="288"/>
+<text class="muted" x="350.0" y="304" text-anchor="middle">25%</text>
+<text x="130" y="40" text-anchor="end">Grok 4.7</text>
+<path class="bar" d="M140.0,28 h3.6 q4,0 4,4 v6 q0,4 -4,4 h-3.6 z"/>
+<text class="muted" x="153.6" y="40">0.9%</text>
+<text x="130" y="66" text-anchor="end">Qwen 3.8 Max</text>
+<path class="bar" d="M140.0,54 h31.3 q4,0 4,4 v6 q0,4 -4,4 h-31.3 z"/>
+<text class="muted" x="181.3" y="66">4.2%</text>
+<text x="130" y="92" text-anchor="end">Qwen 3.8 Flash</text>
+<path class="bar" d="M140.0,80 h64.0 q4,0 4,4 v6 q0,4 -4,4 h-64.0 z"/>
+<text class="muted" x="214.0" y="92">8.1%</text>
+<text x="130" y="118" text-anchor="end">Gemini 4 Argon</text>
+<path class="bar" d="M140.0,106 h56.5 q4,0 4,4 v6 q0,4 -4,4 h-56.5 z"/>
+<text class="muted" x="206.5" y="118">7.2%</text>
+<text x="130" y="144" text-anchor="end">Gemini 3.8 Flash</text>
+<path class="bar" d="M140.0,132 h54.8 q4,0 4,4 v6 q0,4 -4,4 h-54.8 z"/>
+<text class="muted" x="204.8" y="144">7%</text>
+<text x="130" y="170" text-anchor="end">DeepSeek V4.1 Flash</text>
+<path class="bar" d="M140.0,158 h74.1 q4,0 4,4 v6 q0,4 -4,4 h-74.1 z"/>
+<text class="muted" x="224.1" y="170">9.3%</text>
+<text x="130" y="196" text-anchor="end">DeepSeek V4 Pro</text>
+<path class="bar" d="M140.0,184 h169.0 q4,0 4,4 v6 q0,4 -4,4 h-169.0 z"/>
+<text class="muted" x="319.0" y="196">20.6%</text>
+<text x="130" y="222" text-anchor="end">GLM 5.3 Flash</text>
+<path class="bar" d="M140.0,210 h122.8 q4,0 4,4 v6 q0,4 -4,4 h-122.8 z"/>
+<text class="muted" x="272.8" y="222">15.1%</text>
+<text x="130" y="248" text-anchor="end">GLM 5.3</text>
+<path class="bar" d="M140.0,236 h106.0 q4,0 4,4 v6 q0,4 -4,4 h-106.0 z"/>
+<text class="muted" x="256.0" y="248">13.1%</text>
+<text x="130" y="274" text-anchor="end">All</text>
+<path class="bar" d="M140.0,262 h75.8 q4,0 4,4 v6 q0,4 -4,4 h-75.8 z"/>
+<text class="muted" x="225.8" y="274">9.5%</text>
+<text class="title" x="400" y="14">With the guard</text>
+<line class="grid" x1="400.0" x2="400.0" y1="24" y2="288"/>
+<text class="muted" x="400.0" y="304" text-anchor="middle">0%</text>
+<line class="grid" x1="442.0" x2="442.0" y1="24" y2="288"/>
+<text class="muted" x="442.0" y="304" text-anchor="middle">5%</text>
+<line class="grid" x1="484.0" x2="484.0" y1="24" y2="288"/>
+<text class="muted" x="484.0" y="304" text-anchor="middle">10%</text>
+<line class="grid" x1="526.0" x2="526.0" y1="24" y2="288"/>
+<text class="muted" x="526.0" y="304" text-anchor="middle">15%</text>
+<line class="grid" x1="568.0" x2="568.0" y1="24" y2="288"/>
+<text class="muted" x="568.0" y="304" text-anchor="middle">20%</text>
+<line class="grid" x1="610.0" x2="610.0" y1="24" y2="288"/>
+<text class="muted" x="610.0" y="304" text-anchor="middle">25%</text>
+<path class="bar" d="M400.0,28 h0.2 q4,0 4,4 v6 q0,4 -4,4 h-0.2 z"/>
+<text class="muted" x="410.2" y="40">0.5%</text>
+<path class="bar" d="M400.0,54 h5.2 q4,0 4,4 v6 q0,4 -4,4 h-5.2 z"/>
+<text class="muted" x="415.2" y="66">1.1%</text>
+<path class="bar" d="M400.0,80 h8.6 q4,0 4,4 v6 q0,4 -4,4 h-8.6 z"/>
+<text class="muted" x="418.6" y="92">1.5%</text>
+<path class="bar" d="M400.0,106 h8.6 q4,0 4,4 v6 q0,4 -4,4 h-8.6 z"/>
+<text class="muted" x="418.6" y="118">1.5%</text>
+<path class="bar" d="M400.0,132 h10.3 q4,0 4,4 v6 q0,4 -4,4 h-10.3 z"/>
+<text class="muted" x="420.3" y="144">1.7%</text>
+<path class="bar" d="M400.0,158 h8.6 q4,0 4,4 v6 q0,4 -4,4 h-8.6 z"/>
+<text class="muted" x="418.6" y="170">1.5%</text>
+<path class="bar" d="M400.0,184 h11.1 q4,0 4,4 v6 q0,4 -4,4 h-11.1 z"/>
+<text class="muted" x="421.1" y="196">1.8%</text>
+<path class="bar" d="M400.0,210 h4.4 q4,0 4,4 v6 q0,4 -4,4 h-4.4 z"/>
+<text class="muted" x="414.4" y="222">1%</text>
+<path class="bar" d="M400.0,236 h10.3 q4,0 4,4 v6 q0,4 -4,4 h-10.3 z"/>
+<text class="muted" x="420.3" y="248">1.7%</text>
+<path class="bar" d="M400.0,262 h7.8 q4,0 4,4 v6 q0,4 -4,4 h-7.8 z"/>
+<text class="muted" x="417.8" y="274">1.4%</text>
+</svg>
