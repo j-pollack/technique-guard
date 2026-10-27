@@ -3,3 +3,4 @@ data/
 datasets/
 __pycache__/
 .venv/
+.claude/

@@ -1,4 +1,4 @@
-# anti-venom
+# technique-guard
 
 Flags user input that tries to prompt-inject or jailbreak a downstream LLM, before it reaches the model.
 
@@ -9,7 +9,7 @@ An **attack** here means an attempt to hijack the model (override its instructio
 ## Usage
 
 ```python
-from anti_venom import check
+from technique_guard import check
 
 v = check(user_text)          # needs TYPESAFE_API_KEY
 if v.action == "block": ...
@@ -21,7 +21,7 @@ v.reasons  # top features pushing the score up, with their contribution
 
 `check()` raises on API or network errors, so the caller decides whether to fail open or fail closed. It also raises if the API answers with a different Jev version than the guard was frozen on.
 
-`anti_venom.py` only uses the standard library, and the frozen guard lives in `guard.json`.
+`technique_guard.py` only uses the standard library, and the frozen guard lives in `guard.json`.
 
 ## Setup
 
@@ -34,7 +34,7 @@ Put keys in `.env.local` (git-ignored):
 
 | Key | Used by |
 |---|---|
-| `TYPESAFE_API_KEY` | `anti_venom.py`, `hillclimb.py`, `freeze.py`, `final_eval.py` |
+| `TYPESAFE_API_KEY` | `technique_guard.py`, `hillclimb.py`, `freeze.py`, `final_eval.py` |
 | `HF_TOKEN` | `corpus.py`, to pull the gated Hugging Face datasets (accept their terms first) |
 | `ANTHROPIC_API_KEY` | `audit.py`, `judge.py`, `replay.py` |
 | `OPENROUTER_API_KEY` | `replay.py` |
@@ -42,7 +42,7 @@ Put keys in `.env.local` (git-ignored):
 ## Tests
 
 ```sh
-.venv/bin/python test_anti_venom.py
+.venv/bin/python test_technique_guard.py
 ```
 
 This runs offline checks on `judge()` with the frozen guard. If `TYPESAFE_API_KEY` is set, it also runs a few live examples.

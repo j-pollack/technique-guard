@@ -1,6 +1,6 @@
 """Flag user input that tries to prompt-inject or jailbreak a downstream LLM.
 
-    from anti_venom import check
+    from technique_guard import check
     v = check(user_text)
     if v.action == "block": ...
     elif v.action == "review": ...

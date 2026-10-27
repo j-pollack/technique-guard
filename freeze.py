@@ -15,7 +15,7 @@ from pathlib import Path
 
 import numpy as np
 
-import anti_venom
+import technique_guard
 import hillclimb as h
 from questions import HARM, INTERACT, LIBRARY, NO_MAIN
 
@@ -31,7 +31,7 @@ def main():
     review_at = float(h.threshold_at(oof[dev], y[dev], REVIEW_FPR))
     w = h.fit(X, y)
     g = {
-        "model": anti_venom.MODEL,
+        "model": technique_guard.MODEL,
         "frozen_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         # Only questions the features use: other harm rewordings are in the library for comparison, not asked.
         "questions": {k: q for k, q in LIBRARY.items() if k not in NO_MAIN or k == HARM},
@@ -49,8 +49,8 @@ def main():
             "oof_catch_at_review": float((oof[dev & (y == 1)] > review_at).mean()),
         },
     }
-    anti_venom.GUARD_PATH.write_text(json.dumps(g, indent=1) + "\n")
-    print(f"wrote {anti_venom.GUARD_PATH.name}: {len(names)} features from {len(g['questions'])} questions, "
+    technique_guard.GUARD_PATH.write_text(json.dumps(g, indent=1) + "\n")
+    print(f"wrote {technique_guard.GUARD_PATH.name}: {len(names)} features from {len(g['questions'])} questions, "
           f"block >= {block_at:.3f}, review >= {review_at:.3f}")
     print(f"dev out-of-fold: catch {g['dev']['oof_catch_at_block']:.0%} blocked, "
           f"{g['dev']['oof_catch_at_review']:.0%} blocked or reviewed")

@@ -19,7 +19,7 @@ from pathlib import Path
 
 import numpy as np
 
-import anti_venom
+import technique_guard
 import hillclimb as h
 from corpus import HELD_OUT, POOL, sample
 from questions import V0, v0_risk
@@ -39,8 +39,8 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
 
 
 def main(n: int):
-    g = anti_venom.guard()
-    ghash = hashlib.sha256(anti_venom.GUARD_PATH.read_bytes()).hexdigest()[:16]
+    g = technique_guard.guard()
+    ghash = hashlib.sha256(technique_guard.GUARD_PATH.read_bytes()).hexdigest()[:16]
     if RUNS.exists() and any(json.loads(l)["guard"] == ghash for l in RUNS.read_text().splitlines()):
         print(f"WARNING: guard {ghash} has already been scored on test. Re-running is fine for reproducing "
               f"numbers, but any change made after seeing them makes test a dev set.\n")
@@ -61,7 +61,7 @@ def main(n: int):
         a = {q: answers[(i["text"], q)] for q in questions}
         if any(v is None for v in a.values()):
             continue
-        v = anti_venom.judge(a, g)
+        v = technique_guard.judge(a, g)
         v0 = v0_risk({k[3:]: x for k, x in a.items() if k.startswith("v0_")})
         rows.append({**i, "action": v.action, "score": v.score, "v0_block": v0 >= 0.8})
     print(f"{len(rows)} of {len(items)} test items scored with guard {ghash}\n")

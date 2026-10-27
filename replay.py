@@ -38,7 +38,7 @@ from pathlib import Path
 
 import numpy as np
 
-import anti_venom
+import technique_guard
 import hillclimb as h
 from corpus import POOL, SOURCES, jsonl, raw_rows, sample
 
@@ -309,13 +309,13 @@ def pick(n: int, cleared: frozenset = frozenset()) -> list[dict]:
     Items in `cleared` (relabelled as not attacks) stay in the selection, so it doesn't change, but are dropped
     afterwards, and weights count only the rest.
     """
-    g0, g = json.loads(SAMPLE_GUARD.read_text()), anti_venom.guard()
+    g0, g = json.loads(SAMPLE_GUARD.read_text()), technique_guard.guard()
     pool = [json.loads(l) for l in POOL.read_text().splitlines()]
     items = [i for i in sample(pool, "test", 150) if (i["source"], i["family"]) in FAMILIES]
     answers = h.fill(items, g0["questions"] | g["questions"])  # cache hits if final_eval.py has run
     for i in items:
         verdict = lambda gg: (None if any(answers[(i["text"], q)] is None for q in gg["questions"])
-                              else anti_venom.judge({q: answers[(i["text"], q)] for q in gg["questions"]}, gg).action)
+                              else technique_guard.judge({q: answers[(i["text"], q)] for q in gg["questions"]}, gg).action)
         i["action"], i["now"] = verdict(g0), verdict(g)
     picked = []
     for fam in FAMILIES:

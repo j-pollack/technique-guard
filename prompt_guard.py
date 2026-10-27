@@ -15,7 +15,7 @@ from pathlib import Path
 
 import numpy as np
 
-import anti_venom
+import technique_guard
 import hillclimb as h
 from corpus import HELD_OUT, POOL, sample
 from final_eval import wilson
@@ -81,7 +81,7 @@ def rate(sel: np.ndarray) -> list:
 def test_rows() -> list[dict]:
     """The final_eval test items under the NIST-aligned labels, with our guard's score and action (cached answers)."""
     import audit
-    g, labels = anti_venom.guard(), audit.technique_labels()
+    g, labels = technique_guard.guard(), audit.technique_labels()
     pool = [json.loads(l) for l in POOL.read_text().splitlines()]
     items = [i | {"label": audit.technique_label(i, labels)} for i in sample(pool, "test", 150)]
     items = [i for i in items if i["label"] is not None]
@@ -90,7 +90,7 @@ def test_rows() -> list[dict]:
     for i in items:
         a = {q: answers[(i["text"], q)] for q in g["questions"]}
         if all(v is not None for v in a.values()):
-            v = anti_venom.judge(a, g)
+            v = technique_guard.judge(a, g)
             rows.append(i | {"ours": v.score, "ours_block": v.action == "block"})
     return rows
 
@@ -123,13 +123,13 @@ def traffic_eval(thr: dict) -> dict:
     import audit
     import traffic
     labels = {r["text"]: r for r in map(json.loads, audit.TECHNIQUE.read_text().splitlines()) if r.get("def") == audit.DEF}
-    g, res = anti_venom.guard(), {}
+    g, res = technique_guard.guard(), {}
     for src in traffic.SOURCES:
         items = traffic.prompts(traffic.EVAL_N, src)
         answers = h.fill(items, g["questions"])
         items = [i for i in items if all(answers[(i["text"], q)] is not None for q in g["questions"])]
         for i in items:
-            i["ours_block"] = anti_venom.judge({q: answers[(i["text"], q)] for q in g["questions"]}, g).action == "block"
+            i["ours_block"] = technique_guard.judge({q: answers[(i["text"], q)] for q in g["questions"]}, g).action == "block"
         ps = {n: score([i["text"] for i in items], n) for n in MODELS}
         flags = {f"{n} {k}": [ps[n][i["text"]] >= t for i in items] for n in MODELS for k, t in thr[n].items() if k != "1% FPR"}
         flags["ours"] = [i["ours_block"] for i in items]

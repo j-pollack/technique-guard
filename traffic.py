@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 
-import anti_venom
+import technique_guard
 import hillclimb as h
 from corpus import hf, raw_rows
 from final_eval import wilson
@@ -57,7 +57,7 @@ def dev_items() -> list[dict]:
         answers = h.fill(items, g["questions"])
         for i in items:
             a = {q: answers[(i["text"], q)] for q in g["questions"]}
-            if all(v is not None for v in a.values()) and (anti_venom.judge(a, g).action != "allow" or rng.random() < AUDIT_FRAC):
+            if all(v is not None for v in a.values()) and (technique_guard.judge(a, g).action != "allow" or rng.random() < AUDIT_FRAC):
                 pick.append(i | {"source": f"traffic_{s}"})
     labels = label_all(pick)
     return [i | {"family": "traffic", "split": "dev", "group": "traffic:" + hashlib.sha256(i["text"].encode()).hexdigest()[:16],
@@ -86,14 +86,14 @@ def label_all(items: list[dict]) -> dict:
 
 
 def main(n: int, source: str = "wildchat"):
-    g = anti_venom.guard()
+    g = technique_guard.guard()
     items = prompts(n, source)
     answers = h.fill(items, g["questions"])
     rows = []
     for i in items:
         a = {q: answers[(i["text"], q)] for q in g["questions"]}
         if all(v is not None for v in a.values()):
-            v = anti_venom.judge(a, g)
+            v = technique_guard.judge(a, g)
             rows.append({**i, "score": v.score, "action": v.action})
     rng = random.Random(1)
     for r in rows:  # flagged: always labelled; allowed: a random slice, weighted up when estimating

@@ -21,7 +21,7 @@ from pathlib import Path
 
 import numpy as np
 
-import anti_venom
+import technique_guard
 from questions import HARM, INTERACT, LIBRARY, NO_MAIN, v0_risk
 
 DATA = Path(__file__).with_name("data")
@@ -37,7 +37,7 @@ def sha(s: str) -> str:
 
 def qkey(q: dict) -> str:
     """Cache key: changes whenever the question's content or the pinned model changes."""
-    return sha(json.dumps({"model": anti_venom.MODEL, "q": q}, sort_keys=True))
+    return sha(json.dumps({"model": technique_guard.MODEL, "q": q}, sort_keys=True))
 
 
 def dev_sample(n: int) -> list[dict]:
@@ -49,7 +49,7 @@ def dev_sample(n: int) -> list[dict]:
 def ask_with_retry(text: str, questions: dict) -> dict:
     for attempt in range(4):
         try:
-            return anti_venom.ask(text, questions, timeout=60)
+            return technique_guard.ask(text, questions, timeout=60)
         except (urllib.error.URLError, TimeoutError) as e:
             if attempt == 3:
                 return {"error": repr(e)}
@@ -88,7 +88,7 @@ def fill(items: list[dict], questions: dict = LIBRARY) -> dict:
                 out.write(json.dumps({"t": t, "q": keys[n], "a": data["answers"][n]}) + "\n")
     if jobs:
         print(f"  {errors} failed calls, served by {sorted(models)}, ${tokens * USD_PER_M / 1e6:.3f} this round")
-    assert models <= {anti_venom.MODEL}, f"unexpected model {models}"
+    assert models <= {technique_guard.MODEL}, f"unexpected model {models}"
     return {(i["text"], n): cache.get((sha(i["text"]), keys[n])) for i in items for n in questions}
 
 
@@ -96,7 +96,7 @@ def row(answers: dict, text: str) -> tuple[list[str], list[float]] | None:
     by_name = {n: answers[(text, n)] for n in LIBRARY}
     if any(a is None for a in by_name.values()):
         return None
-    return anti_venom.featurize(by_name, LIBRARY, HARM, INTERACT, NO_MAIN)
+    return technique_guard.featurize(by_name, LIBRARY, HARM, INTERACT, NO_MAIN)
 
 
 def fit(X: np.ndarray, y: np.ndarray, steps: int = 3000, lr: float = 1.0, l2: float = 1e-3) -> np.ndarray:
@@ -208,7 +208,7 @@ def main(n: int):
 
     with LOG.open("a") as f:
         f.write(json.dumps({
-            "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "model": anti_venom.MODEL, "n_items": len(items),
+            "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "model": technique_guard.MODEL, "n_items": len(items),
             "questions": {nm: qkey(q) for nm, q in LIBRARY.items()}, "summary": summary,
             "per_family_5pct": per_family, "question_auc": q_auc,
         }) + "\n")

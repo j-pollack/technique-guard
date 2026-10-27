@@ -1,9 +1,9 @@
-"""python3 test_anti_venom.py — offline checks on judge() with the frozen guard, plus a live run if TYPESAFE_API_KEY is set."""
+"""python3 test_technique_guard.py — offline checks on judge() with the frozen guard, plus a live run if TYPESAFE_API_KEY is set."""
 
 import os
 from pathlib import Path
 
-from anti_venom import check, guard, judge
+from technique_guard import check, guard, judge
 
 
 def fake(intent: str = "benign", **nouls: float) -> dict[str, dict]:
