@@ -34,6 +34,8 @@ DATASETS = Path(__file__).with_name("datasets")  # raw rows per source; delete a
 POOL = DATA / "pool.jsonl"
 HELD_OUT = {"hackaprompt", "injecagent_ds", "wildguard", "xstest_safe",  # one per major family, never tuned on
             "jbb_gcg", "jbb_random_search", "jbb_pair"}  # NIST AI 100-2e2025 optimization-based and automated attacks
+# Sources added after the splits were first sampled. sample() draws them last, so the existing samples don't change.
+ADDED_LATE = {"jbb_gcg", "jbb_random_search", "jbb_pair"}
 NEAR_DUP = 0.6
 FETCH_CAP = 500  # rows pulled per source before sampling (applies on first pull only)
 rng = random.Random(0)  # page sampling on first pull
@@ -242,7 +244,8 @@ def sample(pool: list[dict], split: str, n: int) -> list[dict]:
     for i in pool:
         if i["split"] == split:
             by_group.setdefault((i["source"], i["family"]), []).append(i)
-    return [x for k in sorted(by_group, key=str) for x in rng.sample(by_group[k], min(n, len(by_group[k])))]
+    order = sorted(by_group, key=lambda k: (k[0] in ADDED_LATE, str(k)))  # one shared stream: new groups go last
+    return [x for k in order for x in rng.sample(by_group[k], min(n, len(by_group[k])))]
 
 
 if __name__ == "__main__":

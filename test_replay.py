@@ -52,3 +52,10 @@ assert audit.technique_label({"text": "y", "source": "mhj", "family": "multi_tur
 assert audit.technique_label({"text": "y", "source": "advbench", "family": "harmful_plain", "label": 0}, lab) == 0
 assert audit.technique_label({"text": "y", "source": "sorry", "family": "obfuscation", "label": 1}, lab) == 1
 print("technique labels ok")
+
+# Adding a late source must not change the existing test sample (sample() shares one random stream).
+from corpus import sample as draw
+base = [{"text": f"{s}{k}", "source": s, "family": "f", "split": "test"} for s in ("a", "z") for k in range(9)]
+late = [{"text": f"jbb{k}", "source": "jbb_gcg", "family": "f", "split": "test"} for k in range(9)]
+assert [i["text"] for i in draw(base + late, "test", 3) if i["source"] != "jbb_gcg"] == [i["text"] for i in draw(base, "test", 3)]
+print("late sources ok")
