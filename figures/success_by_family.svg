@@ -1,0 +1,382 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 724 708" width="724" height="708" role="img"><title>Share of replayed attacks that succeed, by attack family and target model, without and with the guard</title><style>
+  svg { --bar: #2a78d6; --bar2: #eb6834; --ink: #0b0b0b; --muted: #52514e; --grid: #e4e3df; }
+  @media (prefers-color-scheme: dark) { svg { --bar: #3987e5; --bar2: #d95926; --ink: #f0efec; --muted: #c3c2b7; --grid: #3a3936; } }
+  text { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--ink); }
+  .muted { fill: var(--muted); font-size: 12px; }
+  .title { font-weight: 600; font-size: 14px; }
+  .bar { fill: var(--bar); }
+  .bar2 { fill: var(--bar2); }
+  .ci { stroke: var(--ink); stroke-width: 1.5; }
+  .grid { stroke: var(--grid); stroke-width: 1; }
+  .h0 { fill: #cde2fb; } .t0 { fill: #0b0b0b; }
+  .h1 { fill: #b7d3f6; } .t1 { fill: #0b0b0b; }
+  .h2 { fill: #9ec5f4; } .t2 { fill: #0b0b0b; }
+  .h3 { fill: #86b6ef; } .t3 { fill: #0b0b0b; }
+  .h4 { fill: #6da7ec; } .t4 { fill: #0b0b0b; }
+  .h5 { fill: #5598e7; } .t5 { fill: #0b0b0b; }
+  .h6 { fill: #3987e5; } .t6 { fill: #ffffff; }
+  .h7 { fill: #2a78d6; } .t7 { fill: #ffffff; }
+  .h8 { fill: #256abf; } .t8 { fill: #ffffff; }
+  .h9 { fill: #1c5cab; } .t9 { fill: #ffffff; }
+  .h10 { fill: #184f95; } .t10 { fill: #ffffff; }
+  .h11 { fill: #104281; } .t11 { fill: #ffffff; }
+  .h12 { fill: #0d366b; } .t12 { fill: #ffffff; }
+  @media (prefers-color-scheme: dark) {
+    .h0 { fill: #0d366b; } .t0 { fill: #ffffff; }
+    .h1 { fill: #104281; } .t1 { fill: #ffffff; }
+    .h2 { fill: #184f95; } .t2 { fill: #ffffff; }
+    .h3 { fill: #1c5cab; } .t3 { fill: #ffffff; }
+    .h4 { fill: #256abf; } .t4 { fill: #ffffff; }
+    .h5 { fill: #2a78d6; } .t5 { fill: #ffffff; }
+    .h6 { fill: #3987e5; } .t6 { fill: #0b0b0b; }
+    .h7 { fill: #5598e7; } .t7 { fill: #0b0b0b; }
+    .h8 { fill: #6da7ec; } .t8 { fill: #0b0b0b; }
+    .h9 { fill: #86b6ef; } .t9 { fill: #0b0b0b; }
+    .h10 { fill: #9ec5f4; } .t10 { fill: #0b0b0b; }
+    .h11 { fill: #b7d3f6; } .t11 { fill: #0b0b0b; }
+    .h12 { fill: #cde2fb; } .t12 { fill: #0b0b0b; }
+  }
+</style>
+<text class="title" x="0" y="14">Without the guard: % of attacks that succeed</text>
+<text class="muted" x="229.0" y="32" text-anchor="middle">Grok</text>
+<text class="muted" x="229.0" y="46" text-anchor="middle">4.7</text>
+<text class="muted" x="287.0" y="32" text-anchor="middle">Qwen</text>
+<text class="muted" x="287.0" y="46" text-anchor="middle">Max</text>
+<text class="muted" x="345.0" y="32" text-anchor="middle">Qwen</text>
+<text class="muted" x="345.0" y="46" text-anchor="middle">Flash</text>
+<text class="muted" x="403.0" y="32" text-anchor="middle">Gemini</text>
+<text class="muted" x="403.0" y="46" text-anchor="middle">Argon</text>
+<text class="muted" x="461.0" y="32" text-anchor="middle">Gemini</text>
+<text class="muted" x="461.0" y="46" text-anchor="middle">3.8 Flash</text>
+<text class="muted" x="519.0" y="32" text-anchor="middle">DeepSeek</text>
+<text class="muted" x="519.0" y="46" text-anchor="middle">V4.1 Flash</text>
+<text class="muted" x="577.0" y="32" text-anchor="middle">DeepSeek</text>
+<text class="muted" x="577.0" y="46" text-anchor="middle">V4 Pro</text>
+<text class="muted" x="635.0" y="32" text-anchor="middle">GLM</text>
+<text class="muted" x="635.0" y="46" text-anchor="middle">5.3 Flash</text>
+<text class="muted" x="693.0" y="32" text-anchor="middle">GLM</text>
+<text class="muted" x="693.0" y="46" text-anchor="middle">5.3</text>
+<text x="190" y="69" text-anchor="end">HackAPrompt</text>
+<text class="muted" x="229.0" y="69" text-anchor="middle">0</text>
+<rect class="h3" x="259" y="53" width="56" height="24" rx="2"/>
+<text class="t3" x="287.0" y="69" text-anchor="middle">16</text>
+<rect class="h4" x="317" y="53" width="56" height="24" rx="2"/>
+<text class="t4" x="345.0" y="69" text-anchor="middle">26</text>
+<rect class="h1" x="375" y="53" width="56" height="24" rx="2"/>
+<text class="t1" x="403.0" y="69" text-anchor="middle">6</text>
+<rect class="h3" x="433" y="53" width="56" height="24" rx="2"/>
+<text class="t3" x="461.0" y="69" text-anchor="middle">16</text>
+<rect class="h4" x="491" y="53" width="56" height="24" rx="2"/>
+<text class="t4" x="519.0" y="69" text-anchor="middle">25</text>
+<rect class="h3" x="549" y="53" width="56" height="24" rx="2"/>
+<text class="t3" x="577.0" y="69" text-anchor="middle">21</text>
+<rect class="h6" x="607" y="53" width="56" height="24" rx="2"/>
+<text class="t6" x="635.0" y="69" text-anchor="middle">40</text>
+<rect class="h6" x="665" y="53" width="56" height="24" rx="2"/>
+<text class="t6" x="693.0" y="69" text-anchor="middle">40</text>
+<text x="190" y="95" text-anchor="end">Tensor Trust hijack</text>
+<text class="muted" x="229.0" y="95" text-anchor="middle">0</text>
+<rect class="h1" x="259" y="79" width="56" height="24" rx="2"/>
+<text class="t1" x="287.0" y="95" text-anchor="middle">2</text>
+<rect class="h2" x="317" y="79" width="56" height="24" rx="2"/>
+<text class="t2" x="345.0" y="95" text-anchor="middle">12</text>
+<text class="muted" x="403.0" y="95" text-anchor="middle">0</text>
+<rect class="h1" x="433" y="79" width="56" height="24" rx="2"/>
+<text class="t1" x="461.0" y="95" text-anchor="middle">6</text>
+<rect class="h1" x="491" y="79" width="56" height="24" rx="2"/>
+<text class="t1" x="519.0" y="95" text-anchor="middle">1</text>
+<rect class="h1" x="549" y="79" width="56" height="24" rx="2"/>
+<text class="t1" x="577.0" y="95" text-anchor="middle">2</text>
+<rect class="h1" x="607" y="79" width="56" height="24" rx="2"/>
+<text class="t1" x="635.0" y="95" text-anchor="middle">1</text>
+<rect class="h1" x="665" y="79" width="56" height="24" rx="2"/>
+<text class="t1" x="693.0" y="95" text-anchor="middle">6</text>
+<text x="190" y="121" text-anchor="end">Tensor Trust extract</text>
+<text class="muted" x="229.0" y="121" text-anchor="middle">0</text>
+<rect class="h2" x="259" y="105" width="56" height="24" rx="2"/>
+<text class="t2" x="287.0" y="121" text-anchor="middle">10</text>
+<rect class="h2" x="317" y="105" width="56" height="24" rx="2"/>
+<text class="t2" x="345.0" y="121" text-anchor="middle">15</text>
+<rect class="h3" x="375" y="105" width="56" height="24" rx="2"/>
+<text class="t3" x="403.0" y="121" text-anchor="middle">16</text>
+<rect class="h2" x="433" y="105" width="56" height="24" rx="2"/>
+<text class="t2" x="461.0" y="121" text-anchor="middle">10</text>
+<rect class="h2" x="491" y="105" width="56" height="24" rx="2"/>
+<text class="t2" x="519.0" y="121" text-anchor="middle">13</text>
+<rect class="h2" x="549" y="105" width="56" height="24" rx="2"/>
+<text class="t2" x="577.0" y="121" text-anchor="middle">13</text>
+<rect class="h3" x="607" y="105" width="56" height="24" rx="2"/>
+<text class="t3" x="635.0" y="121" text-anchor="middle">16</text>
+<rect class="h3" x="665" y="105" width="56" height="24" rx="2"/>
+<text class="t3" x="693.0" y="121" text-anchor="middle">20</text>
+<text x="190" y="147" text-anchor="end">InjecAgent direct harm</text>
+<text class="muted" x="229.0" y="147" text-anchor="middle">0</text>
+<text class="muted" x="287.0" y="147" text-anchor="middle">0</text>
+<text class="muted" x="345.0" y="147" text-anchor="middle">0</text>
+<text class="muted" x="403.0" y="147" text-anchor="middle">0</text>
+<text class="muted" x="461.0" y="147" text-anchor="middle">0</text>
+<text class="muted" x="519.0" y="147" text-anchor="middle">0</text>
+<rect class="h2" x="549" y="131" width="56" height="24" rx="2"/>
+<text class="t2" x="577.0" y="147" text-anchor="middle">11</text>
+<text class="muted" x="635.0" y="147" text-anchor="middle">0</text>
+<rect class="h1" x="665" y="131" width="56" height="24" rx="2"/>
+<text class="t1" x="693.0" y="147" text-anchor="middle">5</text>
+<text x="190" y="173" text-anchor="end">InjecAgent data stealing</text>
+<rect class="h1" x="201" y="157" width="56" height="24" rx="2"/>
+<text class="t1" x="229.0" y="173" text-anchor="middle">3</text>
+<text class="muted" x="287.0" y="173" text-anchor="middle">0</text>
+<text class="muted" x="345.0" y="173" text-anchor="middle">0</text>
+<text class="muted" x="403.0" y="173" text-anchor="middle">0</text>
+<text class="muted" x="461.0" y="173" text-anchor="middle">0</text>
+<text class="muted" x="519.0" y="173" text-anchor="middle">0</text>
+<rect class="h1" x="549" y="157" width="56" height="24" rx="2"/>
+<text class="t1" x="577.0" y="173" text-anchor="middle">3</text>
+<rect class="h1" x="607" y="157" width="56" height="24" rx="2"/>
+<text class="t1" x="635.0" y="173" text-anchor="middle">3</text>
+<text class="muted" x="693.0" y="173" text-anchor="middle">0</text>
+<text x="190" y="199" text-anchor="end">WildGuardMix jailbreak</text>
+<rect class="h2" x="201" y="183" width="56" height="24" rx="2"/>
+<text class="t2" x="229.0" y="199" text-anchor="middle">9</text>
+<text class="muted" x="287.0" y="199" text-anchor="middle">0</text>
+<rect class="h1" x="317" y="183" width="56" height="24" rx="2"/>
+<text class="t1" x="345.0" y="199" text-anchor="middle">7</text>
+<rect class="h4" x="375" y="183" width="56" height="24" rx="2"/>
+<text class="t4" x="403.0" y="199" text-anchor="middle">23</text>
+<rect class="h3" x="433" y="183" width="56" height="24" rx="2"/>
+<text class="t3" x="461.0" y="199" text-anchor="middle">21</text>
+<rect class="h2" x="491" y="183" width="56" height="24" rx="2"/>
+<text class="t2" x="519.0" y="199" text-anchor="middle">9</text>
+<rect class="h3" x="549" y="183" width="56" height="24" rx="2"/>
+<text class="t3" x="577.0" y="199" text-anchor="middle">16</text>
+<rect class="h1" x="607" y="183" width="56" height="24" rx="2"/>
+<text class="t1" x="635.0" y="199" text-anchor="middle">7</text>
+<rect class="h1" x="665" y="183" width="56" height="24" rx="2"/>
+<text class="t1" x="693.0" y="199" text-anchor="middle">7</text>
+<text x="190" y="225" text-anchor="end">WildJailbreak adversarial</text>
+<text class="muted" x="229.0" y="225" text-anchor="middle">0</text>
+<text class="muted" x="287.0" y="225" text-anchor="middle">0</text>
+<text class="muted" x="345.0" y="225" text-anchor="middle">0</text>
+<text class="muted" x="403.0" y="225" text-anchor="middle">0</text>
+<text class="muted" x="461.0" y="225" text-anchor="middle">0</text>
+<text class="muted" x="519.0" y="225" text-anchor="middle">0</text>
+<text class="muted" x="577.0" y="225" text-anchor="middle">0</text>
+<text class="muted" x="635.0" y="225" text-anchor="middle">0</text>
+<text class="muted" x="693.0" y="225" text-anchor="middle">0</text>
+<text x="190" y="251" text-anchor="end">MHJ multi-turn (3–4 per cell)</text>
+<text class="muted" x="229.0" y="251" text-anchor="middle">0</text>
+<text class="muted" x="287.0" y="251" text-anchor="middle">0</text>
+<rect class="h7" x="317" y="235" width="56" height="24" rx="2"/>
+<text class="t7" x="345.0" y="251" text-anchor="middle">47</text>
+<rect class="h9" x="375" y="235" width="56" height="24" rx="2"/>
+<text class="t9" x="403.0" y="251" text-anchor="middle">64</text>
+<rect class="h7" x="433" y="235" width="56" height="24" rx="2"/>
+<text class="t7" x="461.0" y="251" text-anchor="middle">47</text>
+<rect class="h5" x="491" y="235" width="56" height="24" rx="2"/>
+<text class="t5" x="519.0" y="251" text-anchor="middle">32</text>
+<rect class="h9" x="549" y="235" width="56" height="24" rx="2"/>
+<text class="t9" x="577.0" y="251" text-anchor="middle">64</text>
+<text class="muted" x="635.0" y="251" text-anchor="middle">0</text>
+<text class="muted" x="693.0" y="251" text-anchor="middle">0</text>
+<text x="190" y="277" text-anchor="end">SORRY encodings</text>
+<text class="muted" x="229.0" y="277" text-anchor="middle">–</text>
+<text class="muted" x="287.0" y="277" text-anchor="middle">–</text>
+<text class="muted" x="345.0" y="277" text-anchor="middle">–</text>
+<text class="muted" x="403.0" y="277" text-anchor="middle">0</text>
+<rect class="h1" x="433" y="261" width="56" height="24" rx="2"/>
+<text class="t1" x="461.0" y="277" text-anchor="middle">4</text>
+<text class="muted" x="519.0" y="277" text-anchor="middle">–</text>
+<text class="muted" x="577.0" y="277" text-anchor="middle">–</text>
+<text class="muted" x="635.0" y="277" text-anchor="middle">0</text>
+<text class="muted" x="693.0" y="277" text-anchor="middle">–</text>
+<text x="190" y="303" text-anchor="end">GCG suffixes</text>
+<text class="muted" x="229.0" y="303" text-anchor="middle">0</text>
+<rect class="h1" x="259" y="287" width="56" height="24" rx="2"/>
+<text class="t1" x="287.0" y="303" text-anchor="middle">3</text>
+<rect class="h1" x="317" y="287" width="56" height="24" rx="2"/>
+<text class="t1" x="345.0" y="303" text-anchor="middle">3</text>
+<rect class="h2" x="375" y="287" width="56" height="24" rx="2"/>
+<text class="t2" x="403.0" y="303" text-anchor="middle">9</text>
+<rect class="h1" x="433" y="287" width="56" height="24" rx="2"/>
+<text class="t1" x="461.0" y="303" text-anchor="middle">6</text>
+<rect class="h2" x="491" y="287" width="56" height="24" rx="2"/>
+<text class="t2" x="519.0" y="303" text-anchor="middle">10</text>
+<rect class="h2" x="549" y="287" width="56" height="24" rx="2"/>
+<text class="t2" x="577.0" y="303" text-anchor="middle">9</text>
+<rect class="h2" x="607" y="287" width="56" height="24" rx="2"/>
+<text class="t2" x="635.0" y="303" text-anchor="middle">9</text>
+<rect class="h2" x="665" y="287" width="56" height="24" rx="2"/>
+<text class="t2" x="693.0" y="303" text-anchor="middle">9</text>
+<text x="190" y="329" text-anchor="end">Random-search suffixes</text>
+<text class="muted" x="229.0" y="329" text-anchor="middle">0</text>
+<rect class="h1" x="259" y="313" width="56" height="24" rx="2"/>
+<text class="t1" x="287.0" y="329" text-anchor="middle">3</text>
+<text class="muted" x="345.0" y="329" text-anchor="middle">0</text>
+<rect class="h1" x="375" y="313" width="56" height="24" rx="2"/>
+<text class="t1" x="403.0" y="329" text-anchor="middle">3</text>
+<rect class="h1" x="433" y="313" width="56" height="24" rx="2"/>
+<text class="t1" x="461.0" y="329" text-anchor="middle">3</text>
+<rect class="h2" x="491" y="313" width="56" height="24" rx="2"/>
+<text class="t2" x="519.0" y="329" text-anchor="middle">14</text>
+<rect class="h12" x="549" y="313" width="56" height="24" rx="2"/>
+<text class="t12" x="577.0" y="329" text-anchor="middle">83</text>
+<rect class="h6" x="607" y="313" width="56" height="24" rx="2"/>
+<text class="t6" x="635.0" y="329" text-anchor="middle">45</text>
+<rect class="h3" x="665" y="313" width="56" height="24" rx="2"/>
+<text class="t3" x="693.0" y="329" text-anchor="middle">18</text>
+<text class="title" x="0" y="376">With the guard</text>
+<text class="muted" x="229.0" y="394" text-anchor="middle">Grok</text>
+<text class="muted" x="229.0" y="408" text-anchor="middle">4.7</text>
+<text class="muted" x="287.0" y="394" text-anchor="middle">Qwen</text>
+<text class="muted" x="287.0" y="408" text-anchor="middle">Max</text>
+<text class="muted" x="345.0" y="394" text-anchor="middle">Qwen</text>
+<text class="muted" x="345.0" y="408" text-anchor="middle">Flash</text>
+<text class="muted" x="403.0" y="394" text-anchor="middle">Gemini</text>
+<text class="muted" x="403.0" y="408" text-anchor="middle">Argon</text>
+<text class="muted" x="461.0" y="394" text-anchor="middle">Gemini</text>
+<text class="muted" x="461.0" y="408" text-anchor="middle">3.8 Flash</text>
+<text class="muted" x="519.0" y="394" text-anchor="middle">DeepSeek</text>
+<text class="muted" x="519.0" y="408" text-anchor="middle">V4.1 Flash</text>
+<text class="muted" x="577.0" y="394" text-anchor="middle">DeepSeek</text>
+<text class="muted" x="577.0" y="408" text-anchor="middle">V4 Pro</text>
+<text class="muted" x="635.0" y="394" text-anchor="middle">GLM</text>
+<text class="muted" x="635.0" y="408" text-anchor="middle">5.3 Flash</text>
+<text class="muted" x="693.0" y="394" text-anchor="middle">GLM</text>
+<text class="muted" x="693.0" y="408" text-anchor="middle">5.3</text>
+<text x="190" y="431" text-anchor="end">HackAPrompt</text>
+<text class="muted" x="229.0" y="431" text-anchor="middle">0</text>
+<rect class="h1" x="259" y="415" width="56" height="24" rx="2"/>
+<text class="t1" x="287.0" y="431" text-anchor="middle">7</text>
+<rect class="h1" x="317" y="415" width="56" height="24" rx="2"/>
+<text class="t1" x="345.0" y="431" text-anchor="middle">7</text>
+<rect class="h1" x="375" y="415" width="56" height="24" rx="2"/>
+<text class="t1" x="403.0" y="431" text-anchor="middle">2</text>
+<rect class="h1" x="433" y="415" width="56" height="24" rx="2"/>
+<text class="t1" x="461.0" y="431" text-anchor="middle">7</text>
+<rect class="h1" x="491" y="415" width="56" height="24" rx="2"/>
+<text class="t1" x="519.0" y="431" text-anchor="middle">7</text>
+<rect class="h1" x="549" y="415" width="56" height="24" rx="2"/>
+<text class="t1" x="577.0" y="431" text-anchor="middle">7</text>
+<rect class="h2" x="607" y="415" width="56" height="24" rx="2"/>
+<text class="t2" x="635.0" y="431" text-anchor="middle">8</text>
+<rect class="h2" x="665" y="415" width="56" height="24" rx="2"/>
+<text class="t2" x="693.0" y="431" text-anchor="middle">12</text>
+<text x="190" y="457" text-anchor="end">Tensor Trust hijack</text>
+<text class="muted" x="229.0" y="457" text-anchor="middle">0</text>
+<rect class="h1" x="259" y="441" width="56" height="24" rx="2"/>
+<text class="t1" x="287.0" y="457" text-anchor="middle">2</text>
+<rect class="h1" x="317" y="441" width="56" height="24" rx="2"/>
+<text class="t1" x="345.0" y="457" text-anchor="middle">1</text>
+<text class="muted" x="403.0" y="457" text-anchor="middle">0</text>
+<rect class="h1" x="433" y="441" width="56" height="24" rx="2"/>
+<text class="t1" x="461.0" y="457" text-anchor="middle">1</text>
+<rect class="h1" x="491" y="441" width="56" height="24" rx="2"/>
+<text class="t1" x="519.0" y="457" text-anchor="middle">1</text>
+<rect class="h1" x="549" y="441" width="56" height="24" rx="2"/>
+<text class="t1" x="577.0" y="457" text-anchor="middle">2</text>
+<rect class="h1" x="607" y="441" width="56" height="24" rx="2"/>
+<text class="t1" x="635.0" y="457" text-anchor="middle">1</text>
+<rect class="h1" x="665" y="441" width="56" height="24" rx="2"/>
+<text class="t1" x="693.0" y="457" text-anchor="middle">1</text>
+<text x="190" y="483" text-anchor="end">Tensor Trust extract</text>
+<text class="muted" x="229.0" y="483" text-anchor="middle">0</text>
+<text class="muted" x="287.0" y="483" text-anchor="middle">0</text>
+<text class="muted" x="345.0" y="483" text-anchor="middle">0</text>
+<rect class="h1" x="375" y="467" width="56" height="24" rx="2"/>
+<text class="t1" x="403.0" y="483" text-anchor="middle">3</text>
+<text class="muted" x="461.0" y="483" text-anchor="middle">0</text>
+<text class="muted" x="519.0" y="483" text-anchor="middle">0</text>
+<text class="muted" x="577.0" y="483" text-anchor="middle">0</text>
+<text class="muted" x="635.0" y="483" text-anchor="middle">0</text>
+<rect class="h1" x="665" y="467" width="56" height="24" rx="2"/>
+<text class="t1" x="693.0" y="483" text-anchor="middle">1</text>
+<text x="190" y="509" text-anchor="end">InjecAgent direct harm</text>
+<text class="muted" x="229.0" y="509" text-anchor="middle">0</text>
+<text class="muted" x="287.0" y="509" text-anchor="middle">0</text>
+<text class="muted" x="345.0" y="509" text-anchor="middle">0</text>
+<text class="muted" x="403.0" y="509" text-anchor="middle">0</text>
+<text class="muted" x="461.0" y="509" text-anchor="middle">0</text>
+<text class="muted" x="519.0" y="509" text-anchor="middle">0</text>
+<rect class="h1" x="549" y="493" width="56" height="24" rx="2"/>
+<text class="t1" x="577.0" y="509" text-anchor="middle">1</text>
+<text class="muted" x="635.0" y="509" text-anchor="middle">0</text>
+<text class="muted" x="693.0" y="509" text-anchor="middle">0</text>
+<text x="190" y="535" text-anchor="end">InjecAgent data stealing</text>
+<text class="muted" x="229.0" y="535" text-anchor="middle">0</text>
+<text class="muted" x="287.0" y="535" text-anchor="middle">0</text>
+<text class="muted" x="345.0" y="535" text-anchor="middle">0</text>
+<text class="muted" x="403.0" y="535" text-anchor="middle">0</text>
+<text class="muted" x="461.0" y="535" text-anchor="middle">0</text>
+<text class="muted" x="519.0" y="535" text-anchor="middle">0</text>
+<rect class="h1" x="549" y="519" width="56" height="24" rx="2"/>
+<text class="t1" x="577.0" y="535" text-anchor="middle">1</text>
+<text class="muted" x="635.0" y="535" text-anchor="middle">0</text>
+<text class="muted" x="693.0" y="535" text-anchor="middle">0</text>
+<text x="190" y="561" text-anchor="end">WildGuardMix jailbreak</text>
+<rect class="h2" x="201" y="545" width="56" height="24" rx="2"/>
+<text class="t2" x="229.0" y="561" text-anchor="middle">9</text>
+<text class="muted" x="287.0" y="561" text-anchor="middle">0</text>
+<rect class="h1" x="317" y="545" width="56" height="24" rx="2"/>
+<text class="t1" x="345.0" y="561" text-anchor="middle">7</text>
+<rect class="h2" x="375" y="545" width="56" height="24" rx="2"/>
+<text class="t2" x="403.0" y="561" text-anchor="middle">9</text>
+<rect class="h1" x="433" y="545" width="56" height="24" rx="2"/>
+<text class="t1" x="461.0" y="561" text-anchor="middle">7</text>
+<rect class="h2" x="491" y="545" width="56" height="24" rx="2"/>
+<text class="t2" x="519.0" y="561" text-anchor="middle">9</text>
+<rect class="h2" x="549" y="545" width="56" height="24" rx="2"/>
+<text class="t2" x="577.0" y="561" text-anchor="middle">9</text>
+<text class="muted" x="635.0" y="561" text-anchor="middle">0</text>
+<text class="muted" x="693.0" y="561" text-anchor="middle">0</text>
+<text x="190" y="587" text-anchor="end">WildJailbreak adversarial</text>
+<text class="muted" x="229.0" y="587" text-anchor="middle">0</text>
+<text class="muted" x="287.0" y="587" text-anchor="middle">0</text>
+<text class="muted" x="345.0" y="587" text-anchor="middle">0</text>
+<text class="muted" x="403.0" y="587" text-anchor="middle">0</text>
+<text class="muted" x="461.0" y="587" text-anchor="middle">0</text>
+<text class="muted" x="519.0" y="587" text-anchor="middle">0</text>
+<text class="muted" x="577.0" y="587" text-anchor="middle">0</text>
+<text class="muted" x="635.0" y="587" text-anchor="middle">0</text>
+<text class="muted" x="693.0" y="587" text-anchor="middle">0</text>
+<text x="190" y="613" text-anchor="end">MHJ multi-turn (3–4 per cell)</text>
+<text class="muted" x="229.0" y="613" text-anchor="middle">0</text>
+<text class="muted" x="287.0" y="613" text-anchor="middle">0</text>
+<text class="muted" x="345.0" y="613" text-anchor="middle">0</text>
+<text class="muted" x="403.0" y="613" text-anchor="middle">0</text>
+<text class="muted" x="461.0" y="613" text-anchor="middle">0</text>
+<text class="muted" x="519.0" y="613" text-anchor="middle">0</text>
+<text class="muted" x="577.0" y="613" text-anchor="middle">0</text>
+<text class="muted" x="635.0" y="613" text-anchor="middle">0</text>
+<text class="muted" x="693.0" y="613" text-anchor="middle">0</text>
+<text x="190" y="639" text-anchor="end">SORRY encodings</text>
+<text class="muted" x="229.0" y="639" text-anchor="middle">–</text>
+<text class="muted" x="287.0" y="639" text-anchor="middle">–</text>
+<text class="muted" x="345.0" y="639" text-anchor="middle">–</text>
+<text class="muted" x="403.0" y="639" text-anchor="middle">0</text>
+<text class="muted" x="461.0" y="639" text-anchor="middle">0</text>
+<text class="muted" x="519.0" y="639" text-anchor="middle">–</text>
+<text class="muted" x="577.0" y="639" text-anchor="middle">–</text>
+<text class="muted" x="635.0" y="639" text-anchor="middle">0</text>
+<text class="muted" x="693.0" y="639" text-anchor="middle">–</text>
+<text x="190" y="665" text-anchor="end">GCG suffixes</text>
+<text class="muted" x="229.0" y="665" text-anchor="middle">0</text>
+<text class="muted" x="287.0" y="665" text-anchor="middle">0</text>
+<text class="muted" x="345.0" y="665" text-anchor="middle">0</text>
+<rect class="h1" x="375" y="649" width="56" height="24" rx="2"/>
+<text class="t1" x="403.0" y="665" text-anchor="middle">3</text>
+<rect class="h1" x="433" y="649" width="56" height="24" rx="2"/>
+<text class="t1" x="461.0" y="665" text-anchor="middle">3</text>
+<text class="muted" x="519.0" y="665" text-anchor="middle">0</text>
+<text class="muted" x="577.0" y="665" text-anchor="middle">0</text>
+<text class="muted" x="635.0" y="665" text-anchor="middle">0</text>
+<text class="muted" x="693.0" y="665" text-anchor="middle">0</text>
+<text x="190" y="691" text-anchor="end">Random-search suffixes</text>
+<text class="muted" x="229.0" y="691" text-anchor="middle">0</text>
+<text class="muted" x="287.0" y="691" text-anchor="middle">0</text>
+<text class="muted" x="345.0" y="691" text-anchor="middle">0</text>
+<text class="muted" x="403.0" y="691" text-anchor="middle">0</text>
+<text class="muted" x="461.0" y="691" text-anchor="middle">0</text>
+<text class="muted" x="519.0" y="691" text-anchor="middle">0</text>
+<text class="muted" x="577.0" y="691" text-anchor="middle">0</text>
+<text class="muted" x="635.0" y="691" text-anchor="middle">0</text>
+<text class="muted" x="693.0" y="691" text-anchor="middle">0</text>
+</svg>

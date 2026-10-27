@@ -182,9 +182,15 @@ The grader refused to read 283 replies, nearly all of them to encoded attacks, w
 
 ![Figure 3. Share of replayed attacks that succeed on each target model, without and with the guard.](figures/attack_success.svg)
 
-*Figure 3. Share of attacks that succeed, per target model, without and with the guard (grader refusals dropped; weighted to the test set). Numbers in Appendix C.*
+*Figure 3. Share of attacks that succeed, per target model, without the guard (orange) and with it (blue). Grader refusals dropped; weighted to the test set. Numbers in Appendix C.*
 
 Without the guard, 0.9% (Grok 4.7) to 20.6% (DeepSeek V4 Pro) of attacks succeed, 9.5% overall. With it, 0.5% to 1.8%, and 1.4% overall. Counting grader refusals as working, it's 18.6% → 1.2%.
+
+**Where each model is weak.** Figure 4 breaks the same numbers down by attack family. Without the guard, the models fail in different places. HackAPrompt's injections get through everywhere except Grok, peaking at 40% on both GLM models. MHJ's multi-turn jailbreaks work on five of the nine models (though each cell is only 3–4 attacks). The random-search suffixes are almost entirely a DeepSeek V4 Pro and GLM problem: 83% on V4 Pro, 45% on GLM 5.3 Flash. Grok 4.7 resists nearly everything. With the guard, what's left is mostly HackAPrompt (up to 12%) and WildGuardMix jailbreaks (up to 9%), the two families the guard is weakest on.
+
+![Figure 4. Share of replayed attacks that succeed, by attack family and target model, without and with the guard.](figures/success_by_family.svg)
+
+*Figure 4. Share of attacks that succeed (%), by attack family and target model, without the guard (top) and with it (bottom). Grader refusals dropped; weighted to the test set. "–" means no gradeable replies: the grader refused nearly every SORRY encoding reply. Most cells hold 24–38 pairs; MHJ has 3–4 and WildJailbreak 5, so read those rows loosely. Numbers in Appendix C.*
 
 Attacks the guard misses work much more often than the ones it blocks: 16% vs 9%. Measured on attacks that work, the weakest families are WildGuardMix jailbreaks (50% blocked, CI 0–93%, because there are few working misses), HackAPrompt (71%) and Tensor Trust hijacking (73%).
 
@@ -341,7 +347,7 @@ Traffic: allenai/WildChat-1M [24], lmsys/lmsys-chat-1m [25] (first user turns).
 | Relabelled from attack sets: injection-styled | 162 | 38.3% | 31.1–45.9 |
 | Relabelled multi-turn | 120 | 10.8% | 6.4–17.7 |
 
-**Figure 3: share of replayed attacks that succeed, without and with the guard** (grader refusals dropped; weighted to the test set).
+**Figure 3: share of replayed attacks that succeed, per target, without and with the guard** (grader refusals dropped; weighted to the test set).
 
 | target | without the guard | with the guard |
 |---|---|---|
@@ -355,6 +361,23 @@ Traffic: allenai/WildChat-1M [24], lmsys/lmsys-chat-1m [25] (first user turns).
 | GLM 5.3 Flash | 15.1% | 1.0% |
 | GLM 5.3 | 13.1% | 1.7% |
 | **all** | **9.5%** | **1.4%** |
+
+**Figure 4: share of replayed attacks that succeed, by family and target** (% without the guard → with it, graded pairs in brackets; grader refusals dropped; weighted to the test set).
+
+| family | Grok 4.7 | Qwen Max | Qwen Flash | Gemini Argon | Gemini 3.8 Flash | DeepSeek V4.1 Flash | DeepSeek V4 Pro | GLM 5.3 Flash | GLM 5.3 |
+|---|---|---|---|---|---|---|---|---|---|
+| HackAPrompt | 0 → 0 (31) | 16 → 6.8 (31) | 26.4 → 7.2 (30) | 6.1 → 1.5 (31) | 16 → 6.8 (31) | 25.2 → 6.8 (31) | 20.6 → 6.8 (31) | 39.7 → 7.6 (31) | 39.7 → 12.2 (31) |
+| Tensor Trust hijack | 0 → 0 (24) | 1.7 → 1.7 (24) | 11.5 → 0.9 (23) | 0 → 0 (24) | 5.9 → 0.8 (24) | 0.8 → 0.8 (24) | 1.7 → 1.7 (24) | 0.8 → 0.8 (24) | 5.9 → 0.8 (24) |
+| Tensor Trust extract | 0 → 0 (32) | 9.9 → 0 (32) | 14.6 → 0 (29) | 16.4 → 3.3 (32) | 9.9 → 0 (32) | 13.1 → 0 (32) | 13.1 → 0 (32) | 16.4 → 0 (32) | 20.4 → 0.7 (32) |
+| InjecAgent direct harm | 0 → 0 (25) | 0 → 0 (25) | 0 → 0 (25) | 0 → 0 (25) | 0 → 0 (25) | 0 → 0 (25) | 11.3 → 0.8 (25) | 0 → 0 (25) | 5.2 → 0 (25) |
+| InjecAgent data stealing | 2.7 → 0 (38) | 0 → 0 (38) | 0 → 0 (38) | 0 → 0 (38) | 0 → 0 (38) | 0 → 0 (38) | 3.4 → 0.7 (38) | 2.7 → 0 (38) | 0 → 0 (38) |
+| WildGuardMix jailbreak | 8.6 → 8.6 (15) | 0 → 0 (15) | 7 → 7 (15) | 22.7 → 8.6 (15) | 21.1 → 7 (15) | 8.6 → 8.6 (15) | 15.6 → 8.6 (15) | 7 → 0 (15) | 7 → 0 (15) |
+| WildJailbreak adversarial | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) | 0 → 0 (5) |
+| MHJ multi-turn (3–4 per cell) | 0 → 0 (4) | 0 → 0 (4) | 47.1 → 0 (3) | 64 → 0 (4) | 47.1 → 0 (3) | 32 → 0 (4) | 64 → 0 (4) | 0 → 0 (4) | 0 → 0 (3) |
+| SORRY encodings | – | – | – | 0 → 0 (5) | 4.2 → 0 (24) | – | – | 0 → 0 (1) | – |
+| GCG suffixes | 0 → 0 (32) | 3.1 → 0 (32) | 3.2 → 0 (31) | 9.4 → 3.1 (32) | 6.2 → 3.1 (32) | 9.7 → 0 (31) | 9.4 → 0 (32) | 9.4 → 0 (32) | 9.4 → 0 (32) |
+| Random-search suffixes | 0 → 0 (38) | 2.6 → 0 (38) | 0 → 0 (33) | 2.6 → 0 (38) | 2.7 → 0 (37) | 14.3 → 0 (35) | 83.3 → 0 (36) | 44.7 → 0 (38) | 18.4 → 0 (38) |
+
 
 ## References
 

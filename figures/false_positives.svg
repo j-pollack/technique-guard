@@ -1,12 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 260" width="680" height="260" role="img"><title>Share of test non-attacks the guard blocks, by group</title><style>
-  svg { --bar: #2a78d6; --ink: #0b0b0b; --muted: #52514e; --grid: #e4e3df; }
-  @media (prefers-color-scheme: dark) { svg { --bar: #3987e5; --ink: #f0efec; --muted: #c3c2b7; --grid: #3a3936; } }
+  svg { --bar: #2a78d6; --bar2: #eb6834; --ink: #0b0b0b; --muted: #52514e; --grid: #e4e3df; }
+  @media (prefers-color-scheme: dark) { svg { --bar: #3987e5; --bar2: #d95926; --ink: #f0efec; --muted: #c3c2b7; --grid: #3a3936; } }
   text { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--ink); }
   .muted { fill: var(--muted); font-size: 12px; }
   .title { font-weight: 600; font-size: 14px; }
   .bar { fill: var(--bar); }
+  .bar2 { fill: var(--bar2); }
   .ci { stroke: var(--ink); stroke-width: 1.5; }
   .grid { stroke: var(--grid); stroke-width: 1; }
+  .h0 { fill: #cde2fb; } .t0 { fill: #0b0b0b; }
+  .h1 { fill: #b7d3f6; } .t1 { fill: #0b0b0b; }
+  .h2 { fill: #9ec5f4; } .t2 { fill: #0b0b0b; }
+  .h3 { fill: #86b6ef; } .t3 { fill: #0b0b0b; }
+  .h4 { fill: #6da7ec; } .t4 { fill: #0b0b0b; }
+  .h5 { fill: #5598e7; } .t5 { fill: #0b0b0b; }
+  .h6 { fill: #3987e5; } .t6 { fill: #ffffff; }
+  .h7 { fill: #2a78d6; } .t7 { fill: #ffffff; }
+  .h8 { fill: #256abf; } .t8 { fill: #ffffff; }
+  .h9 { fill: #1c5cab; } .t9 { fill: #ffffff; }
+  .h10 { fill: #184f95; } .t10 { fill: #ffffff; }
+  .h11 { fill: #104281; } .t11 { fill: #ffffff; }
+  .h12 { fill: #0d366b; } .t12 { fill: #ffffff; }
+  @media (prefers-color-scheme: dark) {
+    .h0 { fill: #0d366b; } .t0 { fill: #ffffff; }
+    .h1 { fill: #104281; } .t1 { fill: #ffffff; }
+    .h2 { fill: #184f95; } .t2 { fill: #ffffff; }
+    .h3 { fill: #1c5cab; } .t3 { fill: #ffffff; }
+    .h4 { fill: #256abf; } .t4 { fill: #ffffff; }
+    .h5 { fill: #2a78d6; } .t5 { fill: #ffffff; }
+    .h6 { fill: #3987e5; } .t6 { fill: #0b0b0b; }
+    .h7 { fill: #5598e7; } .t7 { fill: #0b0b0b; }
+    .h8 { fill: #6da7ec; } .t8 { fill: #0b0b0b; }
+    .h9 { fill: #86b6ef; } .t9 { fill: #0b0b0b; }
+    .h10 { fill: #9ec5f4; } .t10 { fill: #0b0b0b; }
+    .h11 { fill: #b7d3f6; } .t11 { fill: #0b0b0b; }
+    .h12 { fill: #cde2fb; } .t12 { fill: #0b0b0b; }
+  }
 </style>
 <text class="title" x="0" y="14">Non-attacks wrongly blocked, by group (95% CI)</text>
 <line class="grid" x1="250.0" x2="250.0" y1="24" y2="236"/>
