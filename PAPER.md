@@ -1,6 +1,6 @@
 # Judging the technique, not the request: a calibrated prompt-attack guard from yes/no questions
 
-*Draft, 2026-10-26. Numbers are for guard v1.1 (`guard.json`, hash `c002f121ffbc3f90`) unless stated. Citations are from memory and need checking before submission.*
+*Draft, 2026-10-26. Numbers are for guard v1.1 (`guard.json`, hash `c002f121ffbc3f90`) unless stated. References checked against primary sources on 2026-10-26; venues for [2], [12] and [16] rest on secondary sources.*
 
 ## Abstract
 
@@ -32,9 +32,9 @@ The guard sees one untrusted input (a user message, or data the model will read 
 
 **Attacks.** Prompt injection was named and demonstrated on GPT-3 by Perez and Ribeiro [1]; Greshake et al. [2] showed *indirect* injection through retrieved data, and Liu et al. [3] formalised injection attacks and defences. Wei et al. [4] traced jailbreaks to competing objectives and mismatched generalisation, which our two jailbreak sub-types (switching off judgment; hiding the request) loosely follow. Optimised suffixes [5], persuasion [6] and multi-turn human jailbreaks [7] are the attack styles where our definition draws its hardest lines: suffixes and encodings are attacks, persuasion is not, and multi-turn escalation is an attack only when a turn uses a technique.
 
-**Benchmarks.** Our sources (Appendix B) span harmful-request sets (AdvBench [5], HarmBench [8], StrongREJECT [9], SORRY-Bench [10]), over-refusal sets (OR-Bench [11], XSTest [12]), jailbreak collections (In-the-Wild [13], WildJailbreak [14], WildGuardMix [15]), injection games and benchmarks (HackAPrompt [16], Tensor Trust [17], Gandalf, InjecAgent [18]) and multi-turn jailbreaks (MHJ [7]). They disagree on what an attack is: harmful-request sets label the request, jailbreak sets label the wrapper. We relabel all of them under one technique-only definition rather than inherit their labels (§4.3).
+**Benchmarks.** Our sources (Appendix B) span harmful-request sets (AdvBench [5], HarmBench [8], StrongREJECT [9], SORRY-Bench [10]), over-refusal sets (OR-Bench [11], XSTest [12]), jailbreak collections (In-the-Wild [13], jackhhao [28], WildJailbreak [14], WildGuardMix [15]), injection games and benchmarks (HackAPrompt [16], Tensor Trust [17], Gandalf [26], InjecAgent [18], deepset [27], safe-guard [29]) and multi-turn jailbreaks (MHJ [7]). They disagree on what an attack is: harmful-request sets label the request, jailbreak sets label the wrapper. We relabel all of them under one technique-only definition rather than inherit their labels (§4.3).
 
-**Guards.** Learned classifiers such as Llama Guard [19], WildGuard [15] and Prompt Guard [20] are fine-tuned on labelled data, and most combine content safety with attack detection; Prompt Guard is closest in scope (injection and jailbreak only). Constitutional classifiers [21] train guards from a written constitution with synthetic data. Our guard differs in being built from plain-language questions to an off-the-shelf judgment model, with a 56-weight combiner, so its decisions can be read and its questions edited without retraining a model.
+**Guards.** Learned classifiers are fine-tuned on labelled data: Llama Guard [19] targets content safety, WildGuard [15] adds adversarial-prompt detection, and Prompt Guard [20] is closest in scope (injection and jailbreak only). Constitutional classifiers [21] train guards from a written constitution with synthetic data. Our guard differs in being built from plain-language questions to an off-the-shelf judgment model, with a 56-weight combiner, so its decisions can be read and its questions edited without retraining a model.
 
 **Evaluating success.** StrongREJECT [9] showed that naive jailbreak graders overstate success; we use its rubric-style grading and find a further overstatement when the grader sees a rewritten prompt instead of the original request (§6). JailbreakBench [22] and AgentDojo [23] measure attack success against target models; we use the same idea to weight a guard's misses by whether they work (§5.2).
 
@@ -215,28 +215,32 @@ Traffic: allenai/WildChat-1M [24], lmsys/lmsys-chat-1m [25] (first user turns).
 
 ## References
 
-[1] Perez, Ribeiro. Ignore Previous Prompt: Attack Techniques for Language Models. 2022.
-[2] Greshake et al. Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection. 2023.
-[3] Liu et al. Formalizing and Benchmarking Prompt Injection Attacks and Defenses. 2024.
-[4] Wei, Haghtalab, Steinhardt. Jailbroken: How Does LLM Safety Training Fail? 2023.
-[5] Zou et al. Universal and Transferable Adversarial Attacks on Aligned Language Models. 2023.
-[6] Zeng et al. How Johnny Can Persuade LLMs to Jailbreak Them. 2024.
-[7] Li et al. LLM Defenses Are Not Robust to Multi-Turn Human Jailbreaks Yet. 2024.
-[8] Mazeika et al. HarmBench: A Standardized Evaluation Framework for Automated Red Teaming and Robust Refusal. 2024.
-[9] Souly et al. A StrongREJECT for Empty Jailbreaks. 2024.
-[10] Xie et al. SORRY-Bench: Systematically Evaluating Large Language Model Safety Refusal. 2024.
-[11] Cui et al. OR-Bench: An Over-Refusal Benchmark for Large Language Models. 2024.
-[12] Röttger et al. XSTest: A Test Suite for Identifying Exaggerated Safety Behaviours in Large Language Models. 2024.
-[13] Shen et al. "Do Anything Now": Characterizing and Evaluating In-The-Wild Jailbreak Prompts on Large Language Models. 2024.
-[14] Jiang et al. WildTeaming at Scale: From In-the-Wild Jailbreaks to (Adversarially) Safer Language Models. 2024.
-[15] Han et al. WildGuard: Open One-Stop Moderation Tools for Safety Risks, Jailbreaks, and Refusals of LLMs. 2024.
-[16] Schulhoff et al. Ignore This Title and HackAPrompt: Exposing Systemic Vulnerabilities of LLMs through a Global Scale Prompt Hacking Competition. 2023.
-[17] Toyer et al. Tensor Trust: Interpretable Prompt Injection Attacks from an Online Game. 2024.
-[18] Zhan et al. InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents. 2024.
-[19] Inan et al. Llama Guard: LLM-based Input-Output Safeguard for Human-AI Conversations. 2023.
-[20] Meta. Prompt Guard (model card). 2024.
-[21] Sharma et al. Constitutional Classifiers: Defending against Universal Jailbreaks across Thousands of Hours of Red Teaming. 2025.
-[22] Chao et al. JailbreakBench: An Open Robustness Benchmark for Jailbreaking Large Language Models. 2024.
-[23] Debenedetti et al. AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents. 2024.
-[24] Zhao et al. WildChat: 1M ChatGPT Interaction Logs in the Wild. 2024.
-[25] Zheng et al. LMSYS-Chat-1M: A Large-Scale Real-World LLM Conversation Dataset. 2024.
+[1] Perez, Ribeiro. Ignore Previous Prompt: Attack Techniques for Language Models. NeurIPS 2022 ML Safety Workshop; arXiv:2211.09527.
+[2] Greshake et al. Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection. AISec '23 (ACM CCS Workshop) 2023.
+[3] Liu et al. Formalizing and Benchmarking Prompt Injection Attacks and Defenses. USENIX Security 2024.
+[4] Wei, Haghtalab, Steinhardt. Jailbroken: How Does LLM Safety Training Fail? NeurIPS 2023.
+[5] Zou et al. Universal and Transferable Adversarial Attacks on Aligned Language Models. arXiv:2307.15043, 2023.
+[6] Zeng et al. How Johnny Can Persuade LLMs to Jailbreak Them: Rethinking Persuasion to Challenge AI Safety by Humanizing LLMs. ACL 2024.
+[7] Li et al. LLM Defenses Are Not Robust to Multi-Turn Human Jailbreaks Yet. NeurIPS 2024 Red Teaming GenAI Workshop; arXiv:2408.15221.
+[8] Mazeika et al. HarmBench: A Standardized Evaluation Framework for Automated Red Teaming and Robust Refusal. ICML 2024.
+[9] Souly et al. A StrongREJECT for Empty Jailbreaks. NeurIPS 2024 Datasets and Benchmarks.
+[10] Xie et al. SORRY-Bench: Systematically Evaluating Large Language Model Safety Refusal. ICLR 2025.
+[11] Cui et al. OR-Bench: An Over-Refusal Benchmark for Large Language Models. ICML 2025.
+[12] Röttger et al. XSTest: A Test Suite for Identifying Exaggerated Safety Behaviours in Large Language Models. NAACL 2024.
+[13] Shen et al. "Do Anything Now": Characterizing and Evaluating In-The-Wild Jailbreak Prompts on Large Language Models. CCS 2024.
+[14] Jiang et al. WildTeaming at Scale: From In-the-Wild Jailbreaks to (Adversarially) Safer Language Models. NeurIPS 2024.
+[15] Han et al. WildGuard: Open One-Stop Moderation Tools for Safety Risks, Jailbreaks, and Refusals of LLMs. NeurIPS 2024 Datasets and Benchmarks.
+[16] Schulhoff et al. Ignore This Title and HackAPrompt: Exposing Systemic Vulnerabilities of LLMs through a Global Scale Prompt Hacking Competition. EMNLP 2023.
+[17] Toyer et al. Tensor Trust: Interpretable Prompt Injection Attacks from an Online Game. ICLR 2024.
+[18] Zhan et al. InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents. Findings of ACL 2024.
+[19] Inan et al. Llama Guard: LLM-based Input-Output Safeguard for Human-AI Conversations. arXiv:2312.06674, 2023.
+[20] Meta. Prompt Guard 86M (model card). Hugging Face meta-llama/Prompt-Guard-86M, 2024.
+[21] Sharma et al. Constitutional Classifiers: Defending against Universal Jailbreaks across Thousands of Hours of Red Teaming. arXiv:2501.18837, 2025.
+[22] Chao et al. JailbreakBench: An Open Robustness Benchmark for Jailbreaking Large Language Models. NeurIPS 2024 Datasets and Benchmarks.
+[23] Debenedetti et al. AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents. NeurIPS 2024 Datasets and Benchmarks.
+[24] Zhao et al. WildChat: 1M ChatGPT Interaction Logs in the Wild. ICLR 2024.
+[25] Zheng et al. LMSYS-Chat-1M: A Large-Scale Real-World LLM Conversation Dataset. ICLR 2024.
+[26] Pfister et al. Gandalf the Red: Adaptive Security for LLMs. ICML 2025; arXiv:2501.07927.
+[27] deepset. prompt-injections (dataset). huggingface.co/datasets/deepset/prompt-injections, 2023.
+[28] Hao. jailbreak-classification (dataset). huggingface.co/datasets/jackhhao/jailbreak-classification, 2023.
+[29] xTRam1. safe-guard-prompt-injection (dataset). huggingface.co/datasets/xTRam1/safe-guard-prompt-injection, 2024.
