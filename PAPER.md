@@ -175,12 +175,11 @@ The sample is up to 40 attacks per family, half blocked and half missed by the g
 
 That's 2,488 attack-and-model pairs. We skipped 68 more: 50 SORRY-Bench cipher attacks whose encoded replies the grader couldn't read, which we left out on purpose, and 18 that came back empty. The guard's verdicts come from cached answers, so a refit guard gets rescored on the same replies without paying for them again.
 
-| | working attacks blocked [95% CI] |
-|---|---|
-| Grader refusals counted as working | **93%** [89, 97] |
-| Grader refusals dropped | **86%** [75, 94] |
+**How many of the working attacks does the guard block?** It depends on what you do with one awkward group. For 283 replies, the grader (Claude Sonnet) refused to read the reply at all, so we can't tell whether the attack worked. Nearly all of them are replies to encoded attacks (ciphers, Morse and the like), and the guard blocks every one of those. So we report it both ways:
+- **Assume every ungraded reply was a successful attack**: the guard blocks **93%** [89, 97] of working attacks. This is the high end, because all of those "successes" are attacks the guard blocked.
+- **Leave the ungraded replies out**: the guard blocks **86%** [75, 94].
 
-The grader refused to read 283 replies, nearly all of them to encoded attacks, which the guard blocks every time. Counting those as working or dropping them gives the two ends of the range.
+The real number sits between the two. Elsewhere in the paper we use the second, more conservative reading unless we say otherwise.
 
 ![Figure 3. Share of replayed attacks that succeed on each target model, without and with the guard.](figures/attack_success.svg)
 
