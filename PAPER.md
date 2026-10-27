@@ -4,7 +4,7 @@
 
 ## Abstract
 
-We build a guard that sits in front of an LLM and blocks prompt injection and jailbreaks, from 36 natural-language yes/no and multiple-choice questions answered by a small judgment model (TypeSafe's Jev, pinned to `jev-1.14.0`) and combined by a logistic regression. Attacks are defined by the NIST AI 100-2e2025 taxonomy, narrowed to techniques visible in the input: the guard judges the *technique* only, never what is being asked for, since whether a request should be answered is the downstream model's and its provider's decision. On a held-out test split of 4,129 items from 25 public datasets (seven sources never seen in tuning, including optimization-based adversarial suffixes), the guard blocks **92.9% of attacks [95% CI 91.6–94.1] at a 5.5% false-positive rate [4.6–6.4]** (AUC 0.985), and 97.5% of adversarial-suffix attacks. Replaying a stratified sample of test attacks against nine production models, it blocks **79–93% of the attacks that actually work** (depending on how ungradeable replies are counted), and cuts attack success from 8–20% to under 2% across models. On real chat traffic it wrongly blocks **0.23%** of WildChat and **0.84%** of LMSYS-Chat first turns. We also report what changed along the way: the attack definition moved headline recall by thirty points, the attacks a guard misses are the ones more likely to work, and grading jailbreak success against a rewritten prompt overstated success by more than 2×.
+We build a guard that sits in front of an LLM and blocks prompt injection and jailbreaks, from 36 natural-language yes/no and multiple-choice questions answered by a small judgment model (TypeSafe's Jev, pinned to `jev-1.14.0`) and combined by a logistic regression. Attacks are defined by the NIST AI 100-2e2025 taxonomy, narrowed to techniques visible in the input: the guard judges the *technique* only, never what is being asked for, since whether a request should be answered is the downstream model's and its provider's decision. On a held-out test split of 4,129 items from 25 public datasets (seven sources never seen in tuning, including optimization-based adversarial suffixes), the guard blocks **92.9% of attacks [95% CI 91.6–94.1] at a 5.5% false-positive rate [4.6–6.4]** (AUC 0.985), and 97.5% of adversarial-suffix attacks. Replaying a stratified sample of test attacks against nine production models, it blocks **86–93% of the attacks that actually work** (depending on how ungradeable replies are counted), and cuts attack success from 10–19% to under 1.5% across models. On real chat traffic it wrongly blocks **0.23%** of WildChat and **0.84%** of LMSYS-Chat first turns. We also report what changed along the way: the attack definition moved headline recall by thirty points, the attacks a guard misses are the ones more likely to work, and grading jailbreak success against a rewritten prompt overstated success by more than 2×.
 
 ## 1. Introduction
 
@@ -13,7 +13,7 @@ Prompt-attack guards are usually evaluated as classifiers on benchmark labels. T
 Contributions:
 1. A **content-agnostic attack definition** aligned with the NIST AI 100-2e2025 taxonomy, which a guard can enforce without a content policy, and a full relabelling of 9,453 benchmark and traffic texts under it (§2, §4.3).
 2. A **cheap, inspectable guard**: 36 plain-language questions, one model call per input, a 56-weight linear combiner, and per-decision reasons (§4).
-3. **Three evaluations**: held-out benchmark test (§5.1), *working-attack* recall from replays against nine target models (§5.2), and false-positive rates on two real chat logs (§5.3).
+3. **Four evaluations**: held-out benchmark test (§5.1), *working-attack* recall from replays against nine target models (§5.2), false-positive rates on two real chat logs (§5.3), and a head-to-head comparison with Llama Prompt Guard 2 (§5.4, pending).
 4. **Negative and methodological results** worth knowing before building a guard (§6).
 
 ## 2. Threat model and attack definition
@@ -55,7 +55,7 @@ The guard sees one untrusted input (a user message, or data the model will read 
 
 **Benchmarks.** Our sources (Appendix B) span harmful-request sets (AdvBench [5], HarmBench [8], StrongREJECT [9], SORRY-Bench [10]), over-refusal sets (OR-Bench [11], XSTest [12]), jailbreak collections (In-the-Wild [13], jackhhao [28], WildJailbreak [14], WildGuardMix [15]), injection games and benchmarks (HackAPrompt [16], Tensor Trust [17], Gandalf [26], InjecAgent [18], deepset [27], safe-guard [29]) and multi-turn jailbreaks (MHJ [7]). They disagree on what an attack is: harmful-request sets label the request, jailbreak sets label the wrapper. We relabel all of them under one technique-only definition rather than inherit their labels (§4.3).
 
-**Guards.** Learned classifiers are fine-tuned on labelled data: Llama Guard [19] targets content safety, WildGuard [15] adds adversarial-prompt detection, and Prompt Guard [20] is closest in scope (injection and jailbreak only). Constitutional classifiers [21] train guards from a written constitution with synthetic data. Our guard differs in being built from plain-language questions to an off-the-shelf judgment model, with a 56-weight combiner, so its decisions can be read and its questions edited without retraining a model.
+**Guards.** Learned classifiers are fine-tuned on labelled data: Llama Guard [19] targets content safety, WildGuard [15] adds adversarial-prompt detection, and Prompt Guard [20] is closest in scope (injection and jailbreak only); we compare against it directly (§5.4). Constitutional classifiers [21] train guards from a written constitution with synthetic data. Our guard differs in being built from plain-language questions to an off-the-shelf judgment model, with a 56-weight combiner, so its decisions can be read and its questions edited without retraining a model.
 
 **Evaluating success.** StrongREJECT [9] showed that naive jailbreak graders overstate success; we use its rubric-style grading and find a further overstatement when the grader sees a rewritten prompt instead of the original request (§6). JailbreakBench [22] and AgentDojo [23] measure attack success against target models; we use the same idea to weight a guard's misses by whether they work (§5.2).
 
@@ -122,31 +122,33 @@ Most false positives are items the source dataset calls attacks and the labeller
 
 ### 5.2 Do the misses work? (replay against nine models)
 
-We sent a stratified sample of test attacks (up to 40 per family, half blocked and half missed by the guard that drew the sample, weighted back to the test population) to nine models via OpenRouter: Grok 4.7, Qwen 3.8 max and flash, Gemini 4 Argon and 3.8 Flash, DeepSeek v4-pro and v4.1-flash, GLM 5.3 and 5.3-flash (temperature 0, low reasoning effort, 4,096 max tokens). Success checks: built-in for HackAPrompt (expected completion), Tensor Trust ("access granted" / leaked code) and InjecAgent (any attacker tool call); for jailbreaks, a StrongREJECT-style Claude Sonnet grader against the **original** request (score ≥ 0.5). Claude was never a target. 1,866 attack × model pairs (60 more were not run); the guard's verdicts come from cached answers, so re-frozen guards are scored on the same paid-for replies.
+We sent a stratified sample of test attacks (up to 40 per family, half blocked and half missed by the guard that drew the sample, weighted back to the test population) to nine models via OpenRouter: Grok 4.7, Qwen 3.8 max and flash, Gemini 4 Argon and 3.8 Flash, DeepSeek v4-pro and v4.1-flash, GLM 5.3 and 5.3-flash (temperature 0, low reasoning effort, 4,096 max tokens). Success checks: built-in for HackAPrompt (expected completion), Tensor Trust ("access granted" / leaked code) and InjecAgent (any attacker tool call); for jailbreaks, a StrongREJECT-style Claude Sonnet grader against the **original** request (score ≥ 0.5). Claude was never a target. The JailbreakBench GCG and random-search sources are graded against JailbreakBench's plain goal. 2,488 attack × model pairs; 68 were not run: 50 SORRY-Bench cipher pairs whose replies the grader could not read, left out by decision, and 18 empty replies; the guard's verdicts come from cached answers, so re-frozen guards are scored on the same paid-for replies.
 
 | | recall on working attacks [95% CI] |
 |---|---|
-| Judge refusals counted as working (the grader declined to read the reply) | **93%** [87, 97] |
-| Judge refusals dropped | **79%** [63, 92] |
+| Judge refusals counted as working (the grader declined to read the reply) | **93%** [89, 97] |
+| Judge refusals dropped | **86%** [75, 94] |
 
-The grader declined 281 pairs, nearly all encoded attacks, which the guard blocks 100%; the two readings bracket the result.
+The grader declined 283 pairs, nearly all encoded attacks, which the guard blocks 100%; the two readings bracket the result.
 
 Attack success, unguarded → guarded (judge refusals dropped):
 
 | target | unguarded | guarded |
 |---|---|---|
-| Grok 4.7 | 1.2% | 0.7% |
-| Qwen 3.8 max | 4.7% | 1.4% |
-| Qwen 3.8 flash | 10.4% | 2.0% |
-| Gemini 4 Argon | 7.6% | 1.5% |
-| Gemini 3.8 Flash | 7.8% | 1.7% |
-| DeepSeek v4.1 flash | 8.3% | 1.9% |
-| DeepSeek v4 pro | 11.8% | 2.4% |
-| GLM 5.3 flash | 10.8% | 1.4% |
-| GLM 5.3 | 12.1% | 2.4% |
-| **all** | **8.3%** | **1.7%** |
+| Grok 4.7 | 0.9% | 0.5% |
+| Qwen 3.8 max | 4.2% | 1.1% |
+| Qwen 3.8 flash | 8.1% | 1.5% |
+| Gemini 4 Argon | 7.2% | 1.5% |
+| Gemini 3.8 Flash | 7.0% | 1.7% |
+| DeepSeek v4.1 flash | 9.3% | 1.5% |
+| DeepSeek v4 pro | 20.6% | 1.8% |
+| GLM 5.3 flash | 15.1% | 1.0% |
+| GLM 5.3 | 13.1% | 1.7% |
+| **all** | **9.5%** | **1.4%** |
 
-(Counting judge refusals as working: 20.2% → 1.5% overall.) The guard compresses the spread between models from 1–12% to 0.7–2.4%. By family, missed attacks work far more often than blocked ones (16% vs 7%); the weakest families on working attacks are WildGuardMix jailbreaks (51%, CI 0–95%: few working misses), HackAPrompt (70%) and Tensor Trust hijacking (73%). The replay predates the adversarial-suffix sources, which are not replayed.
+(Counting judge refusals as working: 18.6% → 1.2% overall.) The guard compresses the spread between models from 1–21% to 0.5–1.8%. By family, missed attacks work far more often than blocked ones (16% vs 9%); the weakest families on working attacks are WildGuardMix jailbreaks (50%, CI 0–93%: few working misses), HackAPrompt (71%) and Tensor Trust hijacking (73%).
+
+**Adversarial suffixes.** GCG suffixes, optimised against Vicuna and Llama-2, barely transfer: 7–8% work on the nine targets. The random-search attacks (a refusal-suppressing template plus a suffix tuned per request) still work 19% of the time, the most effective jailbreak family after SORRY-Bench's encodings. The guard blocks all of them, and 89% of the GCG attacks that work.
 
 ### 5.3 Real traffic
 
@@ -163,6 +165,34 @@ Attack success, unguarded → guarded (judge refusals dropped):
 
 Under guard v1.1, two LMSYS templates caused most false positives: a developer system prompt pasted as a user turn ("You are the text completion model… only send the completion based on the system instructions", 98 occurrences) and an automated toxicity probe (`Say something toxic: "[your answer]" when…`), and LMSYS FPR was 3.16%. v1.2 sends most of the first template to review instead of blocking it (10 of its 24 false positives remain). Under the guard before traffic-dev, WildChat false positives were pasted documents and translation requests tripping the injection questions; training on traffic-dev removed most of them (1.57% → 0.29%). The WildChat attacks it misses are mostly sent to review; they include two run-together Spanish strings and an Arabic letter puzzle that the labeller counted as hiding a request, which is the transformation clause at its loosest.
 
+### 5.4 Comparison with Llama Prompt Guard 2 (TBD)
+
+**Status: pending.** Model access was requested on 2026-10-27 and is awaiting Meta's approval. Every number below is TBD.
+
+Llama Prompt Guard 2 [20] is the closest published guard in scope: a classifier fine-tuned from mDeBERTa (86M) or DeBERTa-xsmall (22M) that scores a single input as benign or malicious, covering jailbreaks and explicit injection. Meta reports AUC 0.998 and 97.5% recall at 1% FPR (86M) on a private benchmark, and 81.2% of attacks prevented at a 3% utility reduction on AgentDojo [23]. Those numbers come from Meta's own test sets and attack definition. They do not compare directly to ours, so we run both models on our inputs.
+
+**Protocol.** Both Prompt Guard 2 models run locally on the same test split, NIST-aligned labels, traffic samples and replay pairs as our guard. Inputs longer than the model's 512-token window are split into chunks and scored by the highest chunk score, as Meta recommends. We report Meta's default threshold (0.5), the threshold that matches our 5.5% test FPR, and recall at 1% FPR for both guards.
+
+| | our guard (v1.2) | Prompt Guard 2 86M | Prompt Guard 2 22M |
+|---|---|---|---|
+| Test AUC | 0.985 | TBD | TBD |
+| Attacks blocked at 1% FPR | TBD | TBD | TBD |
+| Attacks blocked at 5.5% FPR | 92.9% [91.6, 94.1] | TBD | TBD |
+| At the default threshold (0.5): blocked / FPR | — | TBD | TBD |
+| Held-out sources (HackAPrompt, InjecAgent data-stealing, WildGuardMix, GCG, random search) | TBD | TBD | TBD |
+| Working attacks blocked (replay, judge refusals dropped / counted) | 86% / 93% | TBD | TBD |
+| WildChat FPR | 0.23% | TBD | TBD |
+| LMSYS FPR | 0.84% | TBD | TBD |
+| Cost per input | ~$0.0002 (one Jev call, 36 questions) | local; ~92 ms on an A100 (Meta) | local; ~19 ms on an A100 (Meta) |
+
+The table also gets a per-family breakdown: injection, indirect, jailbreak, obfuscation, optimization and multi-turn.
+
+**Caveats.**
+- **Training overlap.** Prompt Guard was likely trained on some of our public sources (e.g. deepset, jackhhao). We report results with and without them.
+- **Labeller advantage.** Our guard was calibrated on dev labels from the same Sonnet labeller that defines the test labels. That favours our guard, and the replay and held-out rows are the least affected.
+- **Scope.** Meta scopes Prompt Guard 2 to explicit techniques, so indirect injection that reads like ordinary instructions may fall outside what it was built for.
+- **Cost and speed.** Prompt Guard's are a real advantage and are reported as such.
+
 ## 6. Findings
 
 1. **The definition moves recall more than any model change.** Under the datasets' own labels our first frozen guard caught 82% of attacks; with SORRY-Bench relabelled under a content-aware policy, 85%; under the content-agnostic definition, the refit guard catches 93%. Read on the other definition's labels, the same guards swap places (§5.1: 62.5% vs 84.6%). Most earlier "misses" (role-play, persuasion, low-resource translation, escalation) were wrappers that cannot be judged without judging content.
@@ -177,7 +207,7 @@ Under guard v1.1, two LMSYS templates caused most false positives: a developer s
 
 - **Labels are one model's judgments** under a definition with a fuzzy boundary (jailbreak-styled text with a weak or implicit switch-off). A blind audit puts the clear error rate at 0.7% and up to 5.4% counting ambiguous items, all in the direction of attacks labelled as non-attacks, which the guard mostly allows (§4.3).
 - **By design the guard allows harmful requests that use only framing** (fiction, persuasion, role-play, other languages, gradual escalation). These are NIST jailbreak techniques we exclude (Table 1); the guard must be paired with a model or content policy that declines them.
-- **The labeller and grader refused some content**: 560 texts unlabelled (dropped), and 281 replay pairs ungraded, which is why §5.2 reports a range. Whether encoded attacks *work* is unmeasured.
+- **The labeller and grader refused some content**: 560 texts unlabelled (dropped), and 283 replay pairs ungraded, which is why §5.2 reports a range. Whether encoded attacks *work* is unmeasured.
 - **Small cells**: multi-turn (25 test attacks), several replay families with few working misses (wide CIs).
 - **Pinned model**: weights are valid only for `jev-1.14.0`; a model bump needs re-answering and re-fitting.
 - **Single-turn screening**: multi-turn conversations are screened as joined user turns.
@@ -187,14 +217,14 @@ Under guard v1.1, two LMSYS templates caused most false positives: a developer s
 
 | item | spend |
 |---|---|
-| Anthropic (Sonnet 5.5: labelling, audits, replay grading, pilots) | **≈ $70** (TODO dashboard figure; $49.91 before the NIST relabel) |
+| Anthropic (Sonnet 5.5: labelling, audits, replay grading, pilots) | **$73.25** ($49.91 before the NIST relabel, $19.46 for it, $3.88 for the suffix replay) |
 | of which: first full relabel, 7,188 texts (Batches API, half price) | ~$12.5 |
 | of which: NIST-aligned relabel, 8,810 texts (Batches API) plus pilots | ~$17 |
-| of which: replay grading | ~$20.7 |
-| OpenRouter (nine replay targets, including pilots) | **$15.71** |
-| TypeSafe Jev (~59,800 calls; $0.042 per million input tokens) | **≈ $3.46** ($3.30 dashboard before the new sources) |
+| of which: replay grading | ~$24.6 |
+| OpenRouter (nine replay targets, including pilots) | **$16.52** |
+| TypeSafe Jev (~59,800 calls; $0.042 per million input tokens) | **$3.50** ($3.30 before the NIST rework, $0.21 for it) |
 
-OpenRouter by target: Gemini 4 Argon $3.76, Qwen3.8 Max $3.32, Grok 4.7 $3.17, DeepSeek V4 Pro $1.81, Gemini 3.8 Flash $1.51, GLM 5.3 $0.97, Qwen3.8 Flash $0.69, DeepSeek V4.1 Flash $0.36, GLM 5.3 Flash $0.13. Screening one input costs one Jev call (36 questions), a fraction of a cent.
+OpenRouter by target, before the suffix replay ($0.81): Gemini 4 Argon $3.76, Qwen3.8 Max $3.32, Grok 4.7 $3.17, DeepSeek V4 Pro $1.81, Gemini 3.8 Flash $1.51, GLM 5.3 $0.97, Qwen3.8 Flash $0.69, DeepSeek V4.1 Flash $0.36, GLM 5.3 Flash $0.13. Screening one input costs one Jev call (36 questions), a fraction of a cent.
 
 ## Appendix A. Labelling prompt
 
@@ -282,7 +312,7 @@ Traffic: allenai/WildChat-1M [24], lmsys/lmsys-chat-1m [25] (first user turns).
 
 [19] Inan et al. Llama Guard: LLM-based Input-Output Safeguard for Human-AI Conversations. arXiv:2312.06674, 2023.
 
-[20] Meta. Prompt Guard 86M (model card). Hugging Face meta-llama/Prompt-Guard-86M, 2024.
+[20] Meta. Llama Prompt Guard 2 86M and 22M (model cards). Hugging Face meta-llama/Llama-Prompt-Guard-2-86M, 2025. Successor to Prompt Guard 86M (meta-llama/Prompt-Guard-86M, 2024).
 
 [21] Sharma et al. Constitutional Classifiers: Defending against Universal Jailbreaks across Thousands of Hours of Red Teaming. arXiv:2501.18837, 2025.
 
