@@ -489,5 +489,5 @@ A separate Claude session labelled 150 random labelled test items blind (no labe
 
 ## Next
 - 2026-10-26 sensitivity (cached answers, no API calls): v1.1 on test under the *earlier* definition's labels blocks 64.0% [61.9, 66.0] at 4.6% FPR, AUC 0.861 (v1: 84.6% at 7.6%, AUC 0.939). Persuasion and role-play 0%, low-resource language 0.7%, by design. Each guard wins on its own definition; now in the paper (§5.1).
-- Paper: related work, references, licences, cost and Appendix A filled. Left: the TypeSafe (Jev) spend figure from the dashboard, and checking the citations (written from memory).
+- Paper: related work, references, licences, cost and Appendix A filled. Jev spend $3.30 (dashboard), ~58,400 calls. Left: checking the citations (written from memory).
 - Phase 2 obfuscation success is unmeasured: Sonnet refuses to grade all of them. Reported as unknown.

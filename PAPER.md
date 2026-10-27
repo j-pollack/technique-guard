@@ -166,7 +166,7 @@ Two LMSYS templates account for most of its false positives: a developer system 
 | of which: full relabel of 7,188 texts (Batches API, half price) | ~$12.5 |
 | of which: replay grading | ~$20.7 |
 | OpenRouter (nine replay targets, including pilots) | **$15.71** |
-| TypeSafe Jev ($0.042 per million input tokens; 700k cached answers over 18,384 texts) | TODO dashboard figure |
+| TypeSafe Jev (~58,400 calls, 700k answers over 18,384 texts; $0.042 per million input tokens) | **$3.30** |
 
 OpenRouter by target: Gemini 4 Argon $3.76, Qwen3.8 Max $3.32, Grok 4.7 $3.17, DeepSeek V4 Pro $1.81, Gemini 3.8 Flash $1.51, GLM 5.3 $0.97, Qwen3.8 Flash $0.69, DeepSeek V4.1 Flash $0.36, GLM 5.3 Flash $0.13. Screening one input costs one Jev call (36 questions), a fraction of a cent.
 
