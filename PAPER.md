@@ -270,7 +270,7 @@ Attacks blocked by family, our guard (frozen) vs Prompt Guard 2 86M (default thr
 
 ## 8. Cost
 
-The whole project, end to end, cost about $93. Running the guard costs one Jev call per input (36 questions), a fraction of a cent.
+The whole project, end to end, cost about $94. Running the guard costs one Jev call per input (36 questions), a fraction of a cent.
 
 | item | spend |
 |---|---|
