@@ -6,7 +6,7 @@
 results/manifests/ lists every row by sha(text) with its source, family, near-duplicate group, split, dataset label,
 the paper's label and where that label came from (labeler.py); the texts themselves are not redistributed. `rebuild`
 downloads each source in full (sources.py), keeps the rows whose hash is listed, and regenerates the fresh rows,
-checking each against its hash. Traffic rows are fetched by conversation id. Rows a source no longer serves are
+checking each against its hash. Traffic rows are refetched from the 60 pages the paper drew. Rows a source no longer serves are
 reported and left out. The first run is slow: HackAPrompt is about 600k rows.
 """
 
@@ -131,16 +131,9 @@ def rebuild(rawdir: Path):
     print(f"fresh: {len(built)} rows, " + ("every hash matches the manifest" if ok else "HASHES DIFFER from the manifest"))
     write("fresh", [{"text": t, **{k: v for k, v in e.items() if k != "sha"}} for t, e in zip(built, m)])
 
-    for source, (dataset, column) in sources.TRAFFIC.items():
+    for source, (dataset, column, total) in sources.TRAFFIC.items():
         m = manifest(f"traffic_{source}")
-        path = rawdir / f"traffic_{source}.jsonl"  # appended as fetched, so a failed run resumes where it stopped
-        got = [json.loads(l) for l in path.read_text().splitlines()] if path.exists() else []
-        have = {r[column] for r in got}
-        with path.open("a") as f:
-            for r in sources.hf_by_id(dataset, column, [e["id"] for e in m if e["id"] not in have]):
-                f.write(json.dumps(r) + "\n")
-                f.flush()
-                got.append(r)
+        got = raw(rawdir, f"traffic_{source}", lambda: sources.hf_pages(dataset, total))
         by_id = {r[column]: sources.first_user_turn(r) for r in got}
         out = [{"text": by_id[e["id"]], **{k: v for k, v in e.items() if k != "sha"}} for e in m if sha(by_id.get(e["id"], "")) == e["sha"]]
         print(f"traffic_{source}: {len(out)} of {len(m)} rows found")

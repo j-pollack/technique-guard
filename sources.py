@@ -13,6 +13,7 @@ import hashlib
 import io
 import json
 import os
+import random
 import time
 import urllib.error
 import urllib.parse
@@ -51,14 +52,13 @@ def hf(dataset: str, config: str, split: str):
             print(f"    {dataset}: {offset:,} of {total:,} rows", flush=True)
 
 
-def hf_by_id(dataset: str, column: str, ids: list[str], batch: int = 20):
-    """The rows of a Hugging Face split whose `column` is in `ids`, through the datasets server's filter."""
-    for k in range(0, len(ids), batch):
-        where = " OR ".join(f"\"{column}\"='{i}'" for i in ids[k:k + batch])
-        q = urllib.parse.urlencode({"dataset": dataset, "config": "default", "split": "train", "where": where, "length": 100})
-        with get(f"{ROWS}/filter?{q}") as resp:
+def hf_pages(dataset: str, total: int, pages: int = 60):
+    """The traffic pull (paper §3.3): page 0 and 59 random 100-row pages of the log, drawn with seed 0 from the row count
+    the log had then. The datasets server's /filter index covers only the front of these logs, so fetch by offset."""
+    for offset in [0, *sorted(random.Random(0).sample(range(100, total, 100), pages - 1))]:
+        q = urllib.parse.urlencode({"dataset": dataset, "config": "default", "split": "train", "offset": offset, "length": 100})
+        with get(f"{ROWS}/rows?{q}") as resp:
             yield from (r["row"] for r in json.load(resp)["rows"])
-        print(f"    {dataset}: {min(k + batch, len(ids)):,} of {len(ids):,} ids", flush=True)
 
 
 def jsonl(url: str):
@@ -156,7 +156,8 @@ SOURCES = [
 ]
 
 # Traffic (paper §3.3): the first user turn of a conversation, from logs whose rows share one shape.
-TRAFFIC = {"wildchat": ("allenai/WildChat-1M", "conversation_hash"), "lmsys": ("lmsys/lmsys-chat-1m", "conversation_id")}
+# Each log: dataset, id column, and its row count at the paper's pull, which fixes the pages hf_pages draws.
+TRAFFIC = {"wildchat": ("allenai/WildChat-1M", "conversation_hash", 837_989), "lmsys": ("lmsys/lmsys-chat-1m", "conversation_id", 1_000_000)}
 
 
 def first_user_turn(r: dict) -> str:

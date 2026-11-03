@@ -54,7 +54,7 @@ Put keys in `.env.local`:
 .venv/bin/python data.py check
 ```
 
-The paper's own pulls were random 100-row pages of each dataset, which cannot be repeated row for row. `rebuild` therefore downloads each source in full and keeps the rows whose hashes the manifests list. It fetches the traffic rows by conversation id, regenerates the 280 fresh rows with seed 0, and checks each fresh row against its hash. If a dataset has since changed or dropped rows, it reports how many it could not find, by source. The first run is slow, because HackAPrompt is about 600k rows. `check` confirms these claims from §3.3:
+The paper's own pulls were random 100-row pages of each dataset, which cannot be repeated row for row. `rebuild` therefore downloads each source in full and keeps the rows whose hashes the manifests list. It refetches the 60 random pages of each chat log that the paper's traffic sample came from (seed 0), regenerates the 280 fresh rows with seed 0, and checks each fresh row against its hash. If a dataset has since changed or dropped rows, it reports how many it could not find, by source. The first run is slow, because HackAPrompt is about 600k rows. `check` confirms these claims from §3.3:
 
 - every row sits on the side its group hash gives;
 - no held-out row shares a near-duplicate group with a dev or spent-test row;
