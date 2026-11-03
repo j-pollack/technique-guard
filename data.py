@@ -133,7 +133,14 @@ def rebuild(rawdir: Path):
 
     for source, (dataset, column) in sources.TRAFFIC.items():
         m = manifest(f"traffic_{source}")
-        got = raw(rawdir, f"traffic_{source}", lambda: sources.hf_by_id(dataset, column, [e["id"] for e in m]))
+        path = rawdir / f"traffic_{source}.jsonl"  # appended as fetched, so a failed run resumes where it stopped
+        got = [json.loads(l) for l in path.read_text().splitlines()] if path.exists() else []
+        have = {r[column] for r in got}
+        with path.open("a") as f:
+            for r in sources.hf_by_id(dataset, column, [e["id"] for e in m if e["id"] not in have]):
+                f.write(json.dumps(r) + "\n")
+                f.flush()
+                got.append(r)
         by_id = {r[column]: sources.first_user_turn(r) for r in got}
         out = [{"text": by_id[e["id"]], **{k: v for k, v in e.items() if k != "sha"}} for e in m if sha(by_id.get(e["id"], "")) == e["sha"]]
         print(f"traffic_{source}: {len(out)} of {len(m)} rows found")
