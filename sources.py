@@ -25,7 +25,7 @@ HELD_OUT = {"hackaprompt", "injecagent_ds", "wildguard", "xstest_safe", "jbb_gcg
 NEAR_DUP = 0.6  # word-trigram Jaccard at or above which two texts share a near-duplicate group
 
 
-def get(url: str, tries: int = 5):
+def get(url: str, tries: int = 10):
     hf_host = urllib.parse.urlparse(url).hostname.endswith("huggingface.co")
     headers = {"Authorization": f"Bearer {os.environ['HF_TOKEN']}"} if os.environ.get("HF_TOKEN") and hf_host else {}
     for attempt in range(tries):
@@ -34,7 +34,7 @@ def get(url: str, tries: int = 5):
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as e:  # HF's datasets server throws the odd 5xx/429
             if attempt == tries - 1 or (isinstance(e, urllib.error.HTTPError) and e.code < 500 and e.code != 429):
                 raise
-            time.sleep(5 * 2 ** attempt)
+            time.sleep(min(5 * 2 ** attempt, 300))  # up to ~20 minutes in all: outages outlast a short backoff
 
 
 def hf(dataset: str, config: str, split: str):
