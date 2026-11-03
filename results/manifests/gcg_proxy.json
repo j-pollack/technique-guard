@@ -1,0 +1,502 @@
+[
+ {
+  "sha": "d396eec2dce0bcdf",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:5f85c851d31c3df3",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "6d2777078678fdf4",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:eee1f5fd0012f49f",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "baf5d06833e0484d",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:cf6420feeb673047",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "351bd201c3289f84",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:8a27691be9840a47",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "9fef586d79189cb7",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:05f0e9bfecf7f123",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "282e8cbaec4a5e60",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:308c758521436846",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "ddd0afafd3e3302c",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:bd59e90ca29fa56c",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "25926ce05c4836b8",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:70bdcfe4f242fc19",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "1dff42efdf7681e0",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:f226f2c84daa547a",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "364add0f9d8727e2",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:75f0a0dc58f38eb8",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "786b053a4bac5e28",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:dfb3bcc5578a0c46",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "1940535b56fc3a21",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:4619039a3266f84f",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "2a68d467b270115a",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:61fcf0578d73ca58",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "a29d3754cad95560",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:b509c607a5f9c591",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "6f9ebc15c533e1bf",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:ea5633cdaad6628f",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "de168bd8cb28b6de",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:57c4de592538e750",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "cd7c61fe8882b3f0",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:852f1b6c4a3716f1",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "84f268e427bd97f9",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:128ebc1592a77dac",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "9950f0df81620bc1",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:35bff259f329697b",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "e957f51dd62eda9a",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:4b2731cb7fdda337",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "1bdb05e4d1ca3380",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:2a6a861a9466716f",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "4f71596088cbfdd4",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:a88590ecd7c5fca6",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "c0cc1c7931b6049d",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:0b44707abdc12f78",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "fbe28f2c1c1ca450",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:9f9dd5d9c88033ab",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "e3c48b56e79f0be8",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:c607a18dafcd1c10",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "0804d537ef9f48c5",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:8608a4a3489ddaeb",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "e4277fd0f0dea4e1",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:8f2b1f8549d8aa68",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "8895b38bcf122e8e",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:3aa9a6071e02ac69",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "0b4c5b4c9584f154",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:d7fbccb6a77d97ad",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "908e055c1eceba9c",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:5f2b08e8b04a636d",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "5b4e3a219291b551",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:fb37c178987180c4",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "12938edf279df186",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:92ef442dccfd918b",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "aaa191d9e349568b",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:2cf7513453f95740",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "009c70c535169315",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:e3cd1ec2702d120a",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "3393d5def5c4abb0",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:49fd0c36934cdee6",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "1be2ee18539d07d7",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:57a9dc16f53271df",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "19b817931cd8f438",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:adfe8c1ee2412231",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "e7fb2f01abab89f2",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:cd3d149a45fc4b9f",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "b8d41c8e3031bc4a",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:e26b1016e09ac0ac",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "4ffbe0013a5a684f",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:3d68b3beb443398f",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "3d1298c4508cb6a6",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:381f3c798f92ca69",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "dd61debcf9beb2bc",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:7665faf505239687",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "4520d7edda4cac98",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:2df360c8dbde1362",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "beb18c3b6be76306",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:00de4862e29f6d5f",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "7847520977f2d044",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:de033c810b347d79",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "c20c437a2a9f9ed4",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:6d95fbea08bf946c",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "6b5e3267cd22ce3c",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:25ba285a50ce4945",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "3358be53a9bbac94",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:cd3a29c312ff0d39",
+  "split": "test",
+  "dataset_label": 1,
+  "label": null,
+  "label_from": null
+ },
+ {
+  "sha": "f45931cca9e784fc",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:163d0edb4c767ea7",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ },
+ {
+  "sha": "cc3cc32777549a83",
+  "family": "optimization",
+  "source": "jbb_gcg",
+  "group": "jbb_gcg:73d50855a554fabf",
+  "split": "test",
+  "dataset_label": 1,
+  "label": 1,
+  "label_from": "sonnet"
+ }
+]
