@@ -1,10 +1,10 @@
-"""The public datasets (paper §3.1, Table 2): where each comes from and how a row becomes (text, label, family).
+"""The public datasets: where each comes from and how a row becomes (text, label, family).
 
-Every text in the paper is produced by SOURCES below, applied to rows exactly as the dataset publishes them. Gated
+Every dataset text is produced by SOURCES below, applied to rows exactly as the dataset publishes them. Gated
 sets (wildjailbreak, hackaprompt, wildguardmix, mhj, walledai/*, sorry-bench, lmsys) need HF_TOKEN and their terms
 accepted on Hugging Face. label 1 = attack, 0 = not; this is the dataset's label, before relabelling (labeler.py).
 
-The paper's own pulls were random 100-row pages, so they cannot be repeated row for row. data.py downloads each
+The original pulls were random 100-row pages, so they cannot be repeated row for row. data.py downloads each
 source in full instead and keeps the rows the manifests in results/manifests/ list.
 """
 
@@ -13,19 +13,20 @@ import hashlib
 import io
 import json
 import os
+import random
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 
 ROWS = "https://datasets-server.huggingface.co"
-# Sources that only ever went to the test side of the split (paper §3.3): one per major family, plus NIST's
+# Sources that only ever went to the test side of the split: one per major family, plus NIST's
 # optimisation-based and automated attacks.
 HELD_OUT = {"hackaprompt", "injecagent_ds", "wildguard", "xstest_safe", "jbb_gcg", "jbb_random_search", "jbb_pair"}
 NEAR_DUP = 0.6  # word-trigram Jaccard at or above which two texts share a near-duplicate group
 
 
-def get(url: str, tries: int = 5):
+def get(url: str, tries: int = 10):
     hf_host = urllib.parse.urlparse(url).hostname.endswith("huggingface.co")
     headers = {"Authorization": f"Bearer {os.environ['HF_TOKEN']}"} if os.environ.get("HF_TOKEN") and hf_host else {}
     for attempt in range(tries):
@@ -34,7 +35,7 @@ def get(url: str, tries: int = 5):
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as e:  # HF's datasets server throws the odd 5xx/429
             if attempt == tries - 1 or (isinstance(e, urllib.error.HTTPError) and e.code < 500 and e.code != 429):
                 raise
-            time.sleep(5 * 2 ** attempt)
+            time.sleep(min(5 * 2 ** attempt, 300))  # up to ~20 minutes in all: outages outlast a short backoff
 
 
 def hf(dataset: str, config: str, split: str):
@@ -51,14 +52,13 @@ def hf(dataset: str, config: str, split: str):
             print(f"    {dataset}: {offset:,} of {total:,} rows", flush=True)
 
 
-def hf_by_id(dataset: str, column: str, ids: list[str], batch: int = 20):
-    """The rows of a Hugging Face split whose `column` is in `ids`, through the datasets server's filter."""
-    for k in range(0, len(ids), batch):
-        where = " OR ".join(f"\"{column}\"='{i}'" for i in ids[k:k + batch])
-        q = urllib.parse.urlencode({"dataset": dataset, "config": "default", "split": "train", "where": where, "length": 100})
-        with get(f"{ROWS}/filter?{q}") as resp:
+def hf_pages(dataset: str, total: int, pages: int = 60):
+    """The traffic pull: page 0 and 59 random 100-row pages of the log, drawn with seed 0 from the row count
+    the log had then. The datasets server's /filter index covers only the front of these logs, so fetch by offset."""
+    for offset in [0, *sorted(random.Random(0).sample(range(100, total, 100), pages - 1))]:
+        q = urllib.parse.urlencode({"dataset": dataset, "config": "default", "split": "train", "offset": offset, "length": 100})
+        with get(f"{ROWS}/rows?{q}") as resp:
             yield from (r["row"] for r in json.load(resp)["rows"])
-        print(f"    {dataset}: {min(k + batch, len(ids)):,} of {len(ids):,} ids", flush=True)
 
 
 def jsonl(url: str):
@@ -155,8 +155,9 @@ SOURCES = [
     ("jbb_pair", lambda: jbb("PAIR", *(f"black_box/{m}" for m in JBB_TARGETS)), lambda r: (r["prompt"], 1, "jailbreak")),
 ]
 
-# Traffic (paper §3.3): the first user turn of a conversation, from logs whose rows share one shape.
-TRAFFIC = {"wildchat": ("allenai/WildChat-1M", "conversation_hash"), "lmsys": ("lmsys/lmsys-chat-1m", "conversation_id")}
+# Traffic: the first user turn of a conversation, from logs whose rows share one shape.
+# Each log: dataset, id column, and its row count at the original pull, which fixes the pages hf_pages draws.
+TRAFFIC = {"wildchat": ("allenai/WildChat-1M", "conversation_hash", 837_989), "lmsys": ("lmsys/lmsys-chat-1m", "conversation_id", 1_000_000)}
 
 
 def first_user_turn(r: dict) -> str:
@@ -164,7 +165,7 @@ def first_user_turn(r: dict) -> str:
 
 
 def split_of(source: str, group: str) -> str:
-    """Paper §3.3: a near-duplicate group's side comes from a hash of its id; held-out sources are test only."""
+    """A near-duplicate group's side comes from a hash of its id; held-out sources are test only."""
     return "test" if source in HELD_OUT or int(hashlib.sha256(group.encode()).hexdigest(), 16) % 2 else "dev"
 
 

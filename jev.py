@@ -1,6 +1,6 @@
-"""The decision model (paper §4.1, §4.4): one call asks Jev a set of questions about one text.
+"""The decision model: one call asks Jev a set of questions about one text.
 
-JEV_URL / JEV_MODEL point at another server speaking the same API; the paper's open-weight runs used oMLX 0.7.2 at
+JEV_URL / JEV_MODEL point at another server speaking the same API; open-weight runs have used oMLX 0.7.2 at
 http://127.0.0.1:8085/v1/systemone with JEV_MODEL=openjev-MLX-4bit or clef-oQ4e, and JEV_WORKERS=1.
 Answers are cached in data/answers.jsonl, keyed by (sha(text), sha(model + question)), so a rerun only pays for
 what is missing and a different model or wording never reuses another's answers. Needs TYPESAFE_API_KEY for Jev.
@@ -19,7 +19,7 @@ URL = os.environ.get("JEV_URL", "https://api.typesafe.ai/v1/systemone")
 MODEL = os.environ.get("JEV_MODEL", "jev-1.14.0")
 ANSWERS = Path(__file__).with_name("data") / "answers.jsonl"
 BATCH = 40  # questions per call
-USD_PER_M = 0.042  # what the paper paid per million input tokens (§8)
+USD_PER_M = 0.042  # Jev's list price per million input tokens
 
 
 def sha(s: str) -> str:
