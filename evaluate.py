@@ -6,7 +6,7 @@
     .venv/bin/python evaluate.py cells fresh bare definition final no_adversarial no_transform   # Table 11
     .venv/bin/python evaluate.py ablate                  # Table 12
     .venv/bin/python evaluate.py traffic                 # Tables 13, 14
-    JEV_URL=... JEV_MODEL=... .venv/bin/python evaluate.py open heldout|fresh   # Tables 15, 16
+    JEV_URL=... JEV_MODEL=... .venv/bin/python evaluate.py open heldout|fresh [question]   # Tables 15, 16; e.g. `open heldout bare` on Jev
 
 Thresholds are never chosen here except as the paper chose them: the score where 5% of dev non-attacks are blocked.
 Each command writes data/out/<name>.json and compares it with results/<name>.json, the file the paper's numbers
@@ -197,28 +197,28 @@ def heldout(name: str = "heldout"):
     save(name, res)
 
 
-def open_weight(name: str):
-    """The final question alone on another decision model (§4.4, §5.5), with that model's own dev threshold."""
+def open_weight(name: str, q: str = "final"):
+    """One question (default final) alone on a decision model (§4.4, §5.5), at that question's and model's own dev threshold."""
     items = data.rows(name)
     check_examples(items)
     unl = len(data.rows(name, labelled=False)) - len(items)
-    dev, yd, sd = scored(data.rows("dev"), "final", STAGES["final"])
+    dev, yd, sd = scored(data.rows("dev"), q, question(q))
     thr = float(threshold_at(sd, yd))
-    print(f"{jev.MODEL}: dev threshold {thr:.3f}\nTable 16, dev by source")
+    print(f"{jev.MODEL}, {q}: dev threshold {thr:.3f}\nTable 16, dev by source")
     for key, idx in sorted(by(dev, "source", "family", "label").items(), key=lambda p: (-p[0][2], p[0][1], p[0][0])):
         print(f"  {key[0]:18} {key[1]:22} {key[2]} {len(idx):4} blocked {int((sd[idx] > thr).sum()):4}  median {np.median(sd[idx]):.2f}")
-    rows, y, s = scored(items, "final", STAGES["final"])
+    rows, y, s = scored(items, q, question(q))
     blk = s > thr
     ka, na, kn, nn = int(blk[y == 1].sum()), int((y == 1).sum()), int(blk[y == 0].sum()), int((y == 0).sum())
-    res = {"n": len(rows), "unlabelled": unl, "final_threshold": thr, "model": jev.MODEL, "families": {},
-           "final": {"attacks": [ka, na, *wilson(ka, na)], "fpr": [kn, nn, *wilson(kn, nn)], "auc": float(auc(s, y)),
+    res = {"n": len(rows), "unlabelled": unl, f"{q}_threshold": thr, "model": jev.MODEL, "families": {},
+           q: {"attacks": [ka, na, *wilson(ka, na)], "fpr": [kn, nn, *wilson(kn, nn)], "auc": float(auc(s, y)),
                      "at_5pct_fpr": float((s[y == 1] > threshold_at(s, y, 0.05)).mean())}}
-    print(f"\nTable 15, {name}: attacks {pct(ka, na)}   false positives {pct(kn, nn)}   AUC {res['final']['auc']:.3f}   at 5% FPR {res['final']['at_5pct_fpr']:.1%}")
+    print(f"\nTable 15, {name}: attacks {pct(ka, na)}   false positives {pct(kn, nn)}   AUC {res[q]['auc']:.3f}   at 5% FPR {res[q]['at_5pct_fpr']:.1%}")
     print("Table 16, by source")
     for key, idx in sorted(by(rows, "source", "family", "label").items(), key=lambda p: (-p[0][2], p[0][1], p[0][0])):
-        res["families"]["/".join(map(str, key))] = {"n": len(idx), "final": float(blk[idx].mean())}
+        res["families"]["/".join(map(str, key))] = {"n": len(idx), q: float(blk[idx].mean())}
         print(f"  {key[0]:18} {key[1]:22} {key[2]} {len(idx):4} blocked {int(blk[idx].sum()):4}  scores {s[idx].min():.2f} to {s[idx].max():.2f}, median {np.median(s[idx]):.2f}")
-    save(f"{name}_{jev.MODEL}", res)
+    save(f"{name}_{jev.MODEL}" if q == "final" else f"{name}_{q}_{jev.MODEL}", res)
 
 
 def question(name: str) -> dict:

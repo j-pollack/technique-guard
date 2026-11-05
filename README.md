@@ -28,6 +28,7 @@ The `*.json` files at the top level are the summaries the paper's tables were re
 | `ablation.json` | Table 12 |
 | `traffic.json` | Table 13 |
 | `heldout_<model>.json`, `fresh_<model>.json` | Tables 15, 16 |
+| `heldout_bare_jev-1.14.0.json`, `fresh_bare_jev-1.14.0.json` | The bare question on held-out and fresh, at its own dev threshold (`evaluate.py open heldout bare`) |
 
 `results/manifests/` lists every row the paper scored, one file per split: `dev`, `spent_test`, `heldout`, `gcg_proxy`, `fresh`, `traffic_wildchat` and `traffic_lmsys`, plus `heldout_disagreements.jsonl`, the rows where the question and the label disagree. Each row is identified by `sha`, the first 16 hex characters of SHA-256 over its text. Each row also carries its source, family, near-duplicate group and split, the dataset's label, the paper's label, and `label_from`: `sonnet` if the labeler gave the label, `dataset` if a rule kept the dataset's, or null if the labeler refused and the row was dropped. Traffic rows carry the log's conversation id, the half they fall in, and the labeler's answer where there is one.
 
