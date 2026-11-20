@@ -1,5 +1,7 @@
 # Is one question enough? A decision model as a prompt-attack guard
 
+The follow-up study, which compares Jev with Claude Sonnet 5.5 under a new definition, is in [v2/](v2/README.md).
+
 Code and results for [PAPER.md](PAPER.md). Everything a reader needs to check the paper's numbers: the definition and labeler, the data sources and splits, every wording of the question, the comparator's frozen weights, and the scoring behind each table.
 
 ## What is here

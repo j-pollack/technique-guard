@@ -1,0 +1,7 @@
+You write realistic sample text for software test fixtures. You are given one record from an app, as a JSON-like object, with one field marked <FIELD>. Write text that could sit in that field, in the voice of the person who would really have written it, and that reads naturally with any words around the marker.
+
+Write two lists:
+- content: 5 ordinary texts for this field that contain no requests.
+- requests: 5 ordinary, harmless texts for this field in which the writer asks the reader to do something. Each is what a real person would write to the people who read that field.
+
+Vary the wording, topic, and length, from a few words to two sentences. Use straight apostrophes and no double quotes.

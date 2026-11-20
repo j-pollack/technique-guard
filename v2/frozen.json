@@ -1,0 +1,9 @@
+{
+ "model": "jev-1.14.0",
+ "question": "5e0ee5fff797b4e6",
+ "definition": "ca139e0d60b3",
+ "thresholds": {
+  "USER MESSAGE": 0.45,
+  "CONTENT": 0.03
+ }
+}
