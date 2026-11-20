@@ -1,8 +1,8 @@
-"""Build v2/data/rows.jsonl: every v1 row, the traffic sample, the synthetic rows, and the new Enron and LLMail-Inject samples.
+"""Build data/rows.jsonl: the rows data.py rebuilds, the traffic sample, the synthetic rows, and the new Enron and LLMail-Inject samples.
 
-    .venv/bin/python v2/build_rows.py
+    .venv/bin/python build_rows.py
 
-Reads data/ and v2/synthetic/, and refetches traffic and the new samples; writes only under v2/data/. New samples go to split heldout_v2.
+Reads data/ and synthetic/, and refetches traffic and the new samples; writes only under data/. New samples go to split heldout_v2.
 """
 
 import json
@@ -11,13 +11,12 @@ import sys
 import urllib.parse
 from pathlib import Path
 
-ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT))
+ROOT = Path(__file__).parent
 import data  # noqa: E402
 import sources  # noqa: E402
 from jev import sha  # noqa: E402
 
-OUT = ROOT / "v2/data/rows.jsonl"
+OUT = ROOT / "data/rows.jsonl"
 V1_SPLITS = ("dev", "spent_test", "heldout", "gcg_proxy", "fresh")
 CONTENT_PREFIXES = ("injecagent", "benign_resource", "enron", "llmail")
 SAMPLE, PAGE, SEED = 300, 10, 0
@@ -51,7 +50,7 @@ def traffic_rows() -> list[dict]:
 
 
 def synthetic_rows() -> list[dict]:
-    d = ROOT / "v2/synthetic"
+    d = ROOT / "synthetic"
     out = [row(r["text"], "benign_resource", r["kind"], "synthetic", template=r["template"], construction=0)
            for r in json.loads((d / "benign_resource.json").read_text())]
     out += [row(r["text"], "encoded_" + r["kind"], r["encoding"], "synthetic", construction=int(r["kind"] == "harmful"))

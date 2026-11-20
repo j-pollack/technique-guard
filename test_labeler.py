@@ -5,7 +5,6 @@ import tempfile
 from pathlib import Path
 from types import SimpleNamespace as NS
 
-sys.path.insert(0, str(Path(__file__).parent))
 import labeler
 
 rows = [{"text": t, "channel": "USER MESSAGE"} for t in ("labeled", "refused", "failed")]

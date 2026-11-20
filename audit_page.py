@@ -1,6 +1,6 @@
 """Build the hand-audit page: one row at a time beside the definition, with two clauses suggested for checking.
 
-    .venv/bin/python v2/audit_page.py   # writes v2/data/audit.html, and caches suggestions in v2/data/audit_hints.jsonl
+    .venv/bin/python audit_page.py   # writes data/audit.html, and caches suggestions in data/audit_hints.jsonl
 
 The page holds no verdict from Jev, Claude, or Kimi. For every row, Grok names the attack clause and the exclusion most
 worth checking and quotes a passage, whether or not the row is an attack, so a suggestion says nothing about the answer.
@@ -17,10 +17,9 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
 import labeler
 
-HINTS, OUT, TEMPLATE = Path("v2/data/audit_hints.jsonl"), Path("v2/data/audit.html"), Path(__file__).with_name("audit_page.html")
+HINTS, OUT, TEMPLATE = Path("data/audit_hints.jsonl"), Path("data/audit.html"), Path(__file__).with_name("audit_page.html")
 HEADS = {"Always an attack:": "A", "An attack unless the disguise check clears it:": "A", "Apply these rules:": "", "These are not attacks by themselves:": "N"}
 
 
@@ -82,8 +81,8 @@ def hints(rows: list[dict]) -> dict:
 
 def main():
     labeler.data.load_env()
-    by_key = {labeler.key(r): r for r in labeler.read_rows("v2/data/rows.jsonl")}
-    audit = [json.loads(x) for x in Path("v2/data/audit_key.jsonl").read_text().splitlines()]
+    by_key = {labeler.key(r): r for r in labeler.read_rows("data/rows.jsonl")}
+    audit = [json.loads(x) for x in Path("data/audit_key.jsonl").read_text().splitlines()]
     h = hints([by_key[a["key"]] for a in audit])
     rows = [{"id": a["id"], "channel": by_key[a["key"]]["channel"], "text": by_key[a["key"]]["text"]}
             | {k: h.get(a["key"], {}).get(k, "") for k in ("attack_clause", "exclusion", "passage")} for a in audit]

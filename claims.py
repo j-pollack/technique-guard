@@ -1,6 +1,6 @@
 """Every number in the blog post, recomputed from the published files alone and checked against the post.
 
-    .venv/bin/python v2/claims.py   # reads v2/results/ and v2/frozen.json; needs no texts and no API keys
+    .venv/bin/python claims.py   # reads results/ and frozen.json; needs no texts and no API keys
 
 Post: https://www.jonathanpollack.net/writing/decision-models-as-prompt-screens/
 A failed check means the post and the data disagree. Costs come from billing pages, so they are not checked here.
@@ -11,10 +11,9 @@ import json
 import sys
 from pathlib import Path
 
-sys.path[:0] = [str(Path(__file__).parent), str(Path(__file__).parent.parent)]
 import audit_report
 
-R = Path("v2/results")
+R = Path("results")
 TYPES = ["guardrail_evasion", "content_injection", "instruction_override", "prompt_extraction"]
 CLAUSE = {"A1": "instruction_override", "A2": "prompt_extraction", "A9": "content_injection"} | {f"A{i}": "guardrail_evasion" for i in range(3, 9)}
 
@@ -98,7 +97,7 @@ def main():
     rows, audit = read("rows.jsonl"), read("audit.jsonl")
     labels = {a["key"]: a for a in read("labels.jsonl")}
     jev_type = {a["key"]: a["type"] for a in read("jev_types.jsonl")}
-    frozen = json.loads(Path("v2/frozen.json").read_text())
+    frozen = json.loads(Path("frozen.json").read_text())
     results = [check("frozen model and thresholds", (frozen["model"], frozen["thresholds"]), ("jev-1.14.0", {"USER MESSAGE": 0.45, "CONTENT": 0.03})),
                *corpus(rows, labels), *sample(audit), *accuracy(audit), *false_positives(audit, jev_type), *type_match(audit, jev_type)]
     print(f"\n{sum(results)} of {len(results)} claims match the post")

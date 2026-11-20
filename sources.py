@@ -1,10 +1,10 @@
-"""The public datasets (paper §3.1, Table 2): where each comes from and how a row becomes (text, label, family).
+"""The public datasets: where each comes from and how a row becomes (text, label, family).
 
-Every text in the paper is produced by SOURCES below, applied to rows exactly as the dataset publishes them. Gated
+Every dataset text is produced by SOURCES below, applied to rows exactly as the dataset publishes them. Gated
 sets (wildjailbreak, hackaprompt, wildguardmix, mhj, walledai/*, sorry-bench, lmsys) need HF_TOKEN and their terms
 accepted on Hugging Face. label 1 = attack, 0 = not; this is the dataset's label, before relabelling (labeler.py).
 
-The paper's own pulls were random 100-row pages, so they cannot be repeated row for row. data.py downloads each
+The original pulls were random 100-row pages, so they cannot be repeated row for row. data.py downloads each
 source in full instead and keeps the rows the manifests in results/manifests/ list.
 """
 
@@ -20,7 +20,7 @@ import urllib.parse
 import urllib.request
 
 ROWS = "https://datasets-server.huggingface.co"
-# Sources that only ever went to the test side of the split (paper §3.3): one per major family, plus NIST's
+# Sources that only ever went to the test side of the split: one per major family, plus NIST's
 # optimisation-based and automated attacks.
 HELD_OUT = {"hackaprompt", "injecagent_ds", "wildguard", "xstest_safe", "jbb_gcg", "jbb_random_search", "jbb_pair"}
 NEAR_DUP = 0.6  # word-trigram Jaccard at or above which two texts share a near-duplicate group
@@ -53,7 +53,7 @@ def hf(dataset: str, config: str, split: str):
 
 
 def hf_pages(dataset: str, total: int, pages: int = 60):
-    """The traffic pull (paper §3.3): page 0 and 59 random 100-row pages of the log, drawn with seed 0 from the row count
+    """The traffic pull: page 0 and 59 random 100-row pages of the log, drawn with seed 0 from the row count
     the log had then. The datasets server's /filter index covers only the front of these logs, so fetch by offset."""
     for offset in [0, *sorted(random.Random(0).sample(range(100, total, 100), pages - 1))]:
         q = urllib.parse.urlencode({"dataset": dataset, "config": "default", "split": "train", "offset": offset, "length": 100})
@@ -155,8 +155,8 @@ SOURCES = [
     ("jbb_pair", lambda: jbb("PAIR", *(f"black_box/{m}" for m in JBB_TARGETS)), lambda r: (r["prompt"], 1, "jailbreak")),
 ]
 
-# Traffic (paper §3.3): the first user turn of a conversation, from logs whose rows share one shape.
-# Each log: dataset, id column, and its row count at the paper's pull, which fixes the pages hf_pages draws.
+# Traffic: the first user turn of a conversation, from logs whose rows share one shape.
+# Each log: dataset, id column, and its row count at the original pull, which fixes the pages hf_pages draws.
 TRAFFIC = {"wildchat": ("allenai/WildChat-1M", "conversation_hash", 837_989), "lmsys": ("lmsys/lmsys-chat-1m", "conversation_id", 1_000_000)}
 
 
@@ -165,7 +165,7 @@ def first_user_turn(r: dict) -> str:
 
 
 def split_of(source: str, group: str) -> str:
-    """Paper §3.3: a near-duplicate group's side comes from a hash of its id; held-out sources are test only."""
+    """A near-duplicate group's side comes from a hash of its id; held-out sources are test only."""
     return "test" if source in HELD_OUT or int(hashlib.sha256(group.encode()).hexdigest(), 16) % 2 else "dev"
 
 

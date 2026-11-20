@@ -1,6 +1,6 @@
 """The audit in detail: intervals that resample template groups, results with parts left out, and each judge's error types.
 
-    .venv/bin/python v2/audit_report.py v2/data/audit_pass2.csv
+    .venv/bin/python audit_report.py data/audit_pass2.csv
 """
 
 import collections
@@ -12,7 +12,6 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path[:0] = [str(Path(__file__).parent), str(Path(__file__).parent.parent)]
 import kimi
 import labeler
 import sources
@@ -22,10 +21,10 @@ TEMPLATE = "you are the text completion model"
 
 
 def load(path: str) -> list[dict]:
-    by_key = {labeler.key(r): r for r in labeler.read_rows("v2/data/rows.jsonl")}
+    by_key = {labeler.key(r): r for r in labeler.read_rows("data/rows.jsonl")}
     human = {r["id"]: r for r in csv.DictReader(open(path, newline=""))}
     third = kimi.answers()
-    rows = [json.loads(x) for x in Path("v2/data/audit_key.jsonl").read_text().splitlines()]
+    rows = [json.loads(x) for x in Path("data/audit_key.jsonl").read_text().splitlines()]
     return [r | {"text": by_key[r["key"]]["text"], "you": human[r["id"]]["is_attack"].strip() == "1", "clause": human[r["id"]].get("clause", "")[:2],
                  "kimi": third[r["key"]]["label"] != "not_attack"} for r in rows]
 

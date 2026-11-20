@@ -1,7 +1,7 @@
 """Jev and Claude against a rater on the audit rows, weighted back to each population. The rater is Kimi or the hand audit.
 
-    .venv/bin/python v2/compare.py kimi
-    .venv/bin/python v2/compare.py <audited.csv>   # needs id and is_attack columns
+    .venv/bin/python compare.py kimi
+    .venv/bin/python compare.py <audited.csv>   # needs id and is_attack columns
 """
 
 import csv
@@ -11,7 +11,6 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).parent))
 import kimi
 
 BAR = 0.05
@@ -40,7 +39,7 @@ def gap_ci(jev, claude, truth, w, cells, n=4000, seed=0) -> tuple:
 
 
 def main(name: str):
-    key = [json.loads(x) for x in Path("v2/data/audit_key.jsonl").read_text().splitlines()]
+    key = [json.loads(x) for x in Path("data/audit_key.jsonl").read_text().splitlines()]
     truth = rater(name, key)
     print(len(truth), "of", len(key), "rows rated")
     for population in ("datasets", "traffic"):

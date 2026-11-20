@@ -1,6 +1,6 @@
 """Which kind of attack Jev sees: a Choice over the four classes, compared with Claude's label and the audit's clause.
 
-    .venv/bin/python v2/jev_type.py   # writes v2/data/jev_types.jsonl and prints the confusion tables
+    .venv/bin/python jev_type.py   # writes data/jev_types.jsonl and prints the confusion tables
 
 Secondary analysis. The frozen Noul and thresholds still decide attack or not; a row's type is read only where both sides
 being compared call it an attack. Audit tables come raw first, then weighted by the audit's sampling weights, by population.
@@ -12,7 +12,6 @@ import json
 import sys
 from pathlib import Path
 
-sys.path[:0] = [str(Path(__file__).parent), str(Path(__file__).parent.parent)]
 import jev_question as jq
 import data
 import jev
@@ -43,22 +42,22 @@ def table(title: str, pairs: list[tuple], rows: list[str], denom: float | None =
 
 def main():
     data.load_env()
-    rows = labeler.read_rows("v2/data/rows.jsonl")
+    rows = labeler.read_rows("data/rows.jsonl")
     items = [{"text": jq.state_text(r)} for r in rows]
     answers = jev.fill(items, {NAME: jq.TYPE_QUESTION})
     jt = {labeler.key(r): a for r, i in zip(rows, items) if (a := answers[(i["text"], NAME)])}
-    Path("v2/data/jev_types.jsonl").write_text("".join(json.dumps({"key": k, "type": a["choice"], "p": a["probabilities"], "model": jev.MODEL}) + "\n" for k, a in jt.items()))
+    Path("data/jev_types.jsonl").write_text("".join(json.dumps({"key": k, "type": a["choice"], "p": a["probabilities"], "model": jev.MODEL}) + "\n" for k, a in jt.items()))
     print(len(jt), "typed of", len(rows))
 
-    thr = json.loads(Path("v2/frozen.json").read_text())["thresholds"]
-    noul = {x["key"]: x["noul"] for x in labeler.read_jsonl(Path("v2/data/jev_scores.jsonl"))}
+    thr = json.loads(Path("frozen.json").read_text())["thresholds"]
+    noul = {x["key"]: x["noul"] for x in labeler.read_jsonl(Path("data/jev_scores.jsonl"))}
     flags = {labeler.key(r) for r in rows if noul.get(labeler.key(r), 0) > thr[r["channel"]]}
-    claude = {a["key"]: a["label"] for a in labeler.read_jsonl(Path("v2/data/labels.jsonl")) if a.get("label")}
+    claude = {a["key"]: a["label"] for a in labeler.read_jsonl(Path("data/labels.jsonl")) if a.get("label")}
     both = [(claude[k], jt[k]["choice"]) for k in flags if k in jt and claude.get(k, "not_attack") != "not_attack"]
     table("All rows, Jev flags and Claude calls an attack: Claude's label x Jev's type", both, TYPES)
 
-    audit = [json.loads(x) for x in Path("v2/data/audit_key.jsonl").read_text().splitlines()]
-    you = {r["id"]: r for r in csv.DictReader(open("v2/data/audit_pass2.csv", newline=""))}
+    audit = [json.loads(x) for x in Path("data/audit_key.jsonl").read_text().splitlines()]
+    you = {r["id"]: r for r in csv.DictReader(open("data/audit_pass2.csv", newline=""))}
     att = [(r, CLAUSE[you[r["id"]]["clause"][:2]]) for r in audit if you[r["id"]]["is_attack"].strip() == "1"]
     all3 = [(r, c) for r, c in att if r["jev"] and r["claude"]]
     table("Audit, all three call an attack: your clause x Jev's type", [(c, jt[r["key"]]["choice"]) for r, c in all3], TYPES)

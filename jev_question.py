@@ -1,11 +1,10 @@
-"""The labeler's prompt as one Jev Noul, built from v2/prompt_attack_definition.txt so the two cannot drift apart.
+"""The labeler's prompt as one Jev Noul, built from prompt_attack_definition.txt so the two cannot drift apart.
 
-    .venv/bin/python v2/jev_question.py   # writes v2/data/jev_question.json and checks that no text was lost
+    .venv/bin/python jev_question.py   # writes data/jev_question.json and checks that no text was lost
 
 Untuned. Noul fields accept nested JSON (docs.typesafe.ai/primitives/advanced), so the prompt's sections stay labeled and
 keep their wording. The state is the object Claude reads, {"CHANNEL", "TEXT"}. Question ids never reach the model, so the
 attack classes are named inside the criteria. Only "Decide the label." is dropped: the question does that job.
-Answers are cached in v2/data/answers.jsonl, not v1's data/answers.jsonl.
 """
 
 import json
@@ -14,8 +13,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-ROOT = Path(__file__).parent.parent
-sys.path[:0] = [str(ROOT / "v2"), str(ROOT)]
+ROOT = Path(__file__).parent
 import jev  # noqa: E402
 import labeler  # noqa: E402
 
@@ -89,7 +87,7 @@ def state_text(r: dict) -> str:
 
 
 def ask(text: str, questions: dict, timeout: float = 60) -> dict:
-    """jev.ask with the object state, in place of v1's {"untrusted_user_input": text} wrapper."""
+    """jev.ask with the JSON object as Jev's state."""
     body = {"model": jev.MODEL, "state": json.loads(text), "questions": questions}
     req = urllib.request.Request(jev.URL, data=json.dumps(body).encode(), headers={
         "Authorization": f"Bearer {jev.os.environ.get('TYPESAFE_API_KEY', '')}", "Content-Type": "application/json"})
@@ -98,10 +96,9 @@ def ask(text: str, questions: dict, timeout: float = 60) -> dict:
 
 
 jev.ask = ask
-jev.ANSWERS = ROOT / "v2/data/answers.jsonl"
 
 if __name__ == "__main__":
     missing = check()
     assert missing == ["Decide the label."], missing
-    (ROOT / "v2/data/jev_question.json").write_text(json.dumps(QUESTION, ensure_ascii=False, indent=1))
+    (ROOT / "data/jev_question.json").write_text(json.dumps(QUESTION, ensure_ascii=False, indent=1))
     print("ok: only missing", missing, "|", len(" ".join(strings(QUESTION)).split()), "words")

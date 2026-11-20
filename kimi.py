@@ -1,6 +1,6 @@
 """A third opinion from Kimi, through the labeler's prompt and schema. Answers go to their own file, so the reference labels stay as they are.
 
-    .venv/bin/python v2/kimi.py <keys.txt>   # appends to v2/data/kimi_labels.jsonl and skips keys already answered
+    .venv/bin/python kimi.py <keys.txt>   # appends to data/kimi_labels.jsonl and skips keys already answered
 """
 
 import json
@@ -9,11 +9,10 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
 import labeler
 
 KIMI = "moonshotai/kimi-k3.1-pro"
-OUT = Path("v2/data/kimi_labels.jsonl")
+OUT = Path("data/kimi_labels.jsonl")
 
 
 def answers() -> dict:
@@ -23,7 +22,7 @@ def answers() -> dict:
 def main(keys: set):
     labeler.data.load_env()
     done = {k for k, a in answers().items() if a.get("label") or a.get("error") == "refusal"}
-    todo = [r for r in labeler.read_rows("v2/data/rows.jsonl") if labeler.key(r) in keys - done]
+    todo = [r for r in labeler.read_rows("data/rows.jsonl") if labeler.key(r) in keys - done]
     lock = threading.Lock()
 
     def one(r):

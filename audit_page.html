@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt attack audit</title>
+<style>
+:root { --bg:#f6f5f1; --panel:#fff; --ink:#1d1d1b; --dim:#6b6a65; --line:#dcdad2; --a:#b45309; --a-bg:#fdf1dc; --n:#1d5fa8; --n-bg:#e4eefb; --mark:#ffe58a; --yes:#b3261e; --no:#1b6e3c; }
+@media (prefers-color-scheme: dark) { :root { --bg:#161614; --panel:#201f1c; --ink:#ebe9e2; --dim:#9b998f; --line:#3a3833; --a:#f0a94a; --a-bg:#3a2a10; --n:#7fb2f0; --n-bg:#14273f; --mark:#6b5600; --yes:#f08a80; --no:#6fce94; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 -apple-system, "Segoe UI", sans-serif; }
+header { display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--panel); position:sticky; top:0; z-index:2; }
+header b { font-size:16px; }
+progress { flex:1; min-width:120px; height:8px; }
+button { font:inherit; padding:6px 12px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); cursor:pointer; }
+button:hover { border-color:var(--dim); }
+main { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; padding:16px; height:calc(100vh - 56px); }
+@media (max-width:900px) { main { grid-template-columns:1fr; height:auto; } }
+section { background:var(--panel); border:1px solid var(--line); border-radius:8px; display:flex; flex-direction:column; min-height:0; }
+.head { padding:10px 14px; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.scroll { overflow:auto; padding:14px; flex:1; }
+.channel { font-weight:700; padding:2px 10px; border-radius:99px; border:2px solid var(--ink); letter-spacing:.03em; }
+#text { white-space:pre-wrap; overflow-wrap:anywhere; font:14px/1.55 ui-monospace, Menlo, monospace; }
+mark { background:var(--mark); color:inherit; border-radius:2px; }
+.verdict { padding:10px 14px; border-top:1px solid var(--line); display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.verdict button { font-weight:600; padding:9px 18px; }
+#yes.on { background:var(--yes); color:var(--panel); border-color:var(--yes); }
+#no.on { background:var(--no); color:var(--panel); border-color:var(--no); }
+#note { flex:1; min-width:160px; font:inherit; padding:7px 9px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); }
+.b { padding:5px 8px; margin:2px 0; border-radius:6px; border:1px solid transparent; }
+.b.bullet { margin-left:18px; }
+.b.pick { cursor:pointer; }
+.b.pick:hover { border-color:var(--dim); }
+.b.hintA { background:var(--a-bg); border-color:var(--a); }
+.b.hintN { background:var(--n-bg); border-color:var(--n); }
+.b.chosen { outline:3px solid var(--ink); }
+.tag { font-size:11px; font-weight:700; text-transform:uppercase; margin-right:6px; }
+.hintA .tag { color:var(--a); } .hintN .tag { color:var(--n); }
+.dim { color:var(--dim); font-size:13px; }
+dialog { max-width:640px; width:90%; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); }
+dialog textarea { width:100%; height:220px; font:12px ui-monospace, Menlo, monospace; background:var(--bg); color:var(--ink); }
+</style>
+</head>
+<body>
+<header>
+  <b>Prompt attack audit</b>
+  <span id="count"></span>
+  <progress id="bar" value="0" max="1"></progress>
+  <button id="prev" title="Left arrow">Back</button>
+  <button id="next" title="Right arrow">Forward</button>
+  <button id="todo" title="U">Next unlabeled</button>
+  <button id="export">Export</button>
+</header>
+<main>
+  <section>
+    <div class="head"><span id="rid" class="dim"></span><span id="channel" class="channel"></span><span class="dim">Highlighted: the passage suggested for a first look.</span></div>
+    <div class="scroll"><div id="text"></div></div>
+    <div class="verdict">
+      <button id="yes">Attack (1)</button>
+      <button id="no">Not attack (0)</button>
+      <input id="note" placeholder="Optional note">
+    </div>
+  </section>
+  <section>
+    <div class="head"><b>Definition</b><span class="dim">Amber and blue mark one clause on each side to check first. They are chosen for every row and are not a verdict. Click a clause to label the row with it.</span></div>
+    <div class="scroll" id="rules"></div>
+  </section>
+</main>
+<dialog id="dlg">
+  <p id="summary"></p>
+  <textarea id="csv" readonly></textarea>
+  <p><button id="copy">Copy</button> <button id="save">Download CSV</button> <button id="close">Close</button></p>
+</dialog>
+<script>
+const DATA = /*DATA*/null, ROWS = DATA.rows, KEY = "prompt-attack-audit-pass2";
+const $ = id => document.getElementById(id);
+const NAME = Object.fromEntries(DATA.blocks.filter(b => b.id).map(b => [b.id, b.text.slice(0, 60)]));
+let labels = {}, at = 0;
+try { labels = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+const store = () => { try { localStorage.setItem(KEY, JSON.stringify(labels)); } catch (e) {} };
+const firstTodo = from => { for (let i = 0; i < ROWS.length; i++) { const j = (from + i) % ROWS.length; if (!(ROWS[j].id in labels)) return j; } return from; };
+
+function show(i) {
+  at = (i + ROWS.length) % ROWS.length;
+  const r = ROWS[at], l = labels[r.id], t = $("text"), p = r.passage ? r.text.indexOf(r.passage) : -1;
+  t.textContent = "";
+  if (p < 0) t.append(r.text);
+  else { const m = document.createElement("mark"); m.textContent = r.passage; t.append(r.text.slice(0, p), m, r.text.slice(p + r.passage.length)); }
+  t.parentElement.scrollTop = 0;
+  $("rid").textContent = r.id + " · row " + (at + 1) + " of " + ROWS.length;
+  $("channel").textContent = r.channel;
+  $("note").value = l ? l.n || "" : "";
+  $("yes").className = l && l.a === 1 ? "on" : ""; $("no").className = l && l.a === 0 ? "on" : "";
+  const rules = $("rules"); rules.textContent = "";
+  for (const b of DATA.blocks) {
+    const d = document.createElement("div"), hint = b.id && (b.id === r.attack_clause ? "hintA" : b.id === r.exclusion ? "hintN" : "");
+    d.className = "b" + (b.bullet ? " bullet" : "") + (b.id ? " pick" : "") + (hint ? " " + hint : "") + (l && l.c === b.id ? " chosen" : "");
+    if (hint) { const s = document.createElement("span"); s.className = "tag"; s.textContent = "check"; d.append(s); }
+    d.append(b.text);
+    if (b.id) d.onclick = () => label(b.id[0] === "A" ? 1 : 0, b.id);
+    rules.append(d);
+  }
+  const done = Object.keys(labels).length;
+  $("count").textContent = done + " of " + ROWS.length + " labeled"; $("bar").value = done / ROWS.length;
+}
+
+function label(a, clause) {
+  labels[ROWS[at].id] = { a, c: clause || "", n: $("note").value.trim() };
+  store(); show(at + 1);
+}
+
+function csv() {
+  const q = s => '"' + String(s).replace(/"/g, '""') + '"';
+  return ["id,is_attack,clause,note"].concat(ROWS.filter(r => r.id in labels).map(r => r.id).sort().map(id => {
+    const l = labels[id]; return [id, l.a, q(l.c ? l.c + " " + NAME[l.c] : ""), q(l.n || "")].join(",");
+  })).join("\n") + "\n";
+}
+
+$("yes").onclick = () => label(1); $("no").onclick = () => label(0);
+$("prev").onclick = () => show(at - 1); $("next").onclick = () => show(at + 1); $("todo").onclick = () => show(firstTodo(at + 1));
+$("note").onchange = () => { const l = labels[ROWS[at].id]; if (l) { l.n = $("note").value.trim(); store(); } };
+$("export").onclick = () => { const n = Object.keys(labels).length; $("summary").textContent = n + " of " + ROWS.length + " rows labeled. Download the file, or copy the text and paste it into the chat."; $("csv").value = csv(); $("dlg").showModal(); };
+$("copy").onclick = () => { $("csv").select(); navigator.clipboard.writeText($("csv").value); };
+$("save").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv()], { type: "text/csv" })); a.download = "audit_pass2.csv"; a.click(); };
+$("close").onclick = () => $("dlg").close();
+document.onkeydown = e => {
+  if (e.target === $("note") || $("dlg").open || e.metaKey || e.ctrlKey) return;
+  ({ "1": () => label(1), "0": () => label(0), ArrowLeft: () => show(at - 1), ArrowRight: () => show(at + 1), u: () => show(firstTodo(at + 1)) }[e.key] || (() => {}))();
+};
+show(firstTodo(0));
+</script>
+</body>
+</html>

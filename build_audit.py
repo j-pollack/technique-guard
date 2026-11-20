@@ -1,6 +1,6 @@
 """Draw the 500-row audit from rows not used for tuning, with the frozen rule. Verdicts stay out of the blind file.
 
-    .venv/bin/python v2/build_audit.py   # writes v2/data/audit_blind.csv and v2/data/audit_key.jsonl
+    .venv/bin/python build_audit.py   # writes data/audit_blind.csv and data/audit_key.jsonl
 
 Each population (labeled datasets, traffic) gets 250 rows across four cells: Jev and Claude's verdicts crossed. Rare cells
 would vanish from a random sample, and only the two disagreement cells decide the accuracy gap. Each row keeps a weight,
@@ -14,7 +14,6 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
 import freeze
 import kimi
 import labeler
@@ -34,9 +33,9 @@ def allocate(sizes: dict, total: int) -> dict:
 
 
 def verdicts() -> list[dict]:
-    rows = [r for r in labeler.read_rows("v2/data/rows.jsonl") if r["split"] in POPULATIONS]
-    labels = {a["key"]: a for a in labeler.read_jsonl(Path("v2/data/labels.jsonl"))}
-    scores = {x["key"]: x["noul"] for x in labeler.read_jsonl(Path("v2/data/jev_scores.jsonl"))}
+    rows = [r for r in labeler.read_rows("data/rows.jsonl") if r["split"] in POPULATIONS]
+    labels = {a["key"]: a for a in labeler.read_jsonl(Path("data/labels.jsonl"))}
+    scores = {x["key"]: x["noul"] for x in labeler.read_jsonl(Path("data/jev_scores.jsonl"))}
     second = kimi.answers()
     out = []
     for r in rows:
@@ -69,14 +68,14 @@ def main():
     assert len(sample) == 500 == len({r["key"] for r in sample})
     assert sum(r["weight"] for r in sample) == sum(1 for _ in rows) or abs(sum(r["weight"] for r in sample) - len(rows)) < 1e-6
     fields = ("key", "population", "split", "source", "jev", "claude", "label", "by", "weight")
-    with open("v2/data/audit_key.jsonl", "w") as f:
+    with open("data/audit_key.jsonl", "w") as f:
         for i, r in enumerate(sample, 1):
             f.write(json.dumps({"id": f"A{i:03}"} | {k: r[k] for k in fields}) + "\n")
-    with open("v2/data/audit_blind.csv", "w", newline="") as f:
+    with open("data/audit_blind.csv", "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["id", "channel", "text", "is_attack"])
         w.writerows([f"A{i:03}", r["channel"], r["text"], ""] for i, r in enumerate(sample, 1))
-    Path("v2/data/audit_keys.txt").write_text("\n".join(r["key"] for r in sample))
+    Path("data/audit_keys.txt").write_text("\n".join(r["key"] for r in sample))
     print(Counter((r["population"], r["jev"], r["claude"]) for r in rows))
     print(Counter((r["population"], r["jev"], r["claude"]) for r in sample))
 

@@ -1,6 +1,6 @@
-"""Write the study's public results to v2/results/: every label, score and audit answer, keyed by text hash, with no text.
+"""Write the study's public results to results/: every label, score and audit answer, keyed by text hash, with no text.
 
-    .venv/bin/python v2/publish.py   # reads v2/data/, which holds the texts and stays out of git
+    .venv/bin/python publish.py   # reads data/, which holds the texts and stays out of git
 
 The texts come from datasets whose licenses do not all allow redistribution. build_rows.py rebuilds them from the original
 sources, and labeler.key(row) joins a rebuilt row to these files. Model reasoning is left out because it quotes the texts.
@@ -12,12 +12,11 @@ import json
 import sys
 from pathlib import Path
 
-sys.path[:0] = [str(Path(__file__).parent), str(Path(__file__).parent.parent)]
 import audit_report
 import kimi
 import labeler
 
-DATA, OUT = Path("v2/data"), Path("v2/results")
+DATA, OUT = Path("data"), Path("results")
 
 
 def write(name: str, rows: list[dict]):

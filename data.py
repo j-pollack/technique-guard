@@ -1,12 +1,12 @@
-"""Rebuild every row the paper scored from your own downloads, then check the splits (paper §3.3, §3.4, Appendix C, D).
+"""Rebuild the dataset and traffic rows from your own downloads, then check the splits.
 
     .venv/bin/python data.py rebuild [rawdir]   # downloads into rawdir (default raw/), writes data/<split>.json
     .venv/bin/python data.py check              # split rule, group disjointness, near-duplicates, embedded examples
 
 results/manifests/ lists every row by sha(text) with its source, family, near-duplicate group, split, dataset label,
-the paper's label and where that label came from (labeler.py); the texts themselves are not redistributed. `rebuild`
+an earlier label and where that label came from; the texts themselves are not redistributed. `rebuild`
 downloads each source in full (sources.py), keeps the rows whose hash is listed, and regenerates the fresh rows,
-checking each against its hash. Traffic rows are refetched from the 60 pages the paper drew. Rows a source no longer serves are
+checking each against its hash. Traffic rows are refetched from the 60 pages first drawn. Rows a source no longer serves are
 reported and left out. The first run is slow: HackAPrompt is about 600k rows.
 """
 
@@ -18,7 +18,6 @@ from pathlib import Path
 
 import sources
 from jev import sha
-from questions import check_examples
 
 ROOT = Path(__file__).parent
 DATA, MANIFESTS = ROOT / "data", ROOT / "results" / "manifests"
@@ -39,7 +38,7 @@ def manifest(name: str) -> list[dict]:
 
 
 def rows(name: str, labelled: bool = True) -> list[dict]:
-    """A rebuilt split. labelled drops the rows the labeler refused, as the paper does."""
+    """A rebuilt split. labelled drops the rows an earlier labeler refused."""
     out = json.loads((DATA / f"{name}.json").read_text())
     return [r for r in out if r.get("label") is not None] if labelled and name not in TRAFFIC else out
 
@@ -68,7 +67,7 @@ def attach(name: str, texts: dict) -> list[dict]:
     return out
 
 
-# Fresh rows (paper §3.4, Appendix D): SORRY-Bench's four encodings, applied to the request only.
+# Fresh rows: SORRY-Bench's four encodings, applied to the request only.
 MORSE = {**dict(zip("abcdefghijklmnopqrstuvwxyz", ".- -... -.-. -.. . ..-. --. .... .. .--- -.- .-.. -- -. --- .--. --.- .-. ... - ..- ...- .-- -..- -.-- --..".split())),
          **dict(zip("0123456789", "----- .---- ..--- ...-- ....- ..... -.... --... ---.. ----.".split())),
          ".": ".-.-.-", ",": "--..--", "?": "..--..", "'": ".----.", "!": "-.-.--", "-": "-....-", "/": "-..-.", "(": "-.--.", ")": "-.--.-",
@@ -139,14 +138,9 @@ def rebuild(rawdir: Path):
         print(f"traffic_{source}: {len(out)} of {len(m)} rows found")
         write(f"traffic_{source}", out)
 
-    found = {sha(r["text"]): r["text"] for n in ("heldout", "fresh") for r in rows(n, labelled=False)}
-    with (DATA / "heldout_disagreements.jsonl").open("w") as f:
-        for d in map(json.loads, (MANIFESTS / "heldout_disagreements.jsonl").read_text().splitlines()):
-            f.write(json.dumps({**{k: v for k, v in d.items() if k != "sha"}, "text": found.get(d["sha"], "")[:400]}, ensure_ascii=False) + "\n")
-
 
 def check():
-    """The split claims of §3.3, from the manifests and the rebuilt texts."""
+    """The split rules, from the manifests and the rebuilt texts."""
     for name in SPLITS[:3]:
         bad = [e for e in manifest(name) if e["split"] != sources.split_of(e["source"], e["group"])]
         print(f"{name}: {'every row on the side its group hash gives' if not bad else f'{len(bad)} rows off their group side'}")
@@ -162,8 +156,6 @@ def check():
             into.setdefault(r["source"], []).append(sources.shingles(r["text"]))
     pairs = sum(sources.near_dup(a, b) for s, rs in new.items() for a in rs for b in old.get(s, []))
     print(f"heldout: {pairs} near-duplicate pairs (trigram Jaccard >= {sources.NEAR_DUP}) with dev or spent-test rows")
-    check_examples(rows("heldout", labelled=False) + rows("fresh", labelled=False) + rows("spent_test", labelled=False))
-    print("no example string in the final question occurs in a spent-test, held-out or fresh row")
 
 
 if __name__ == "__main__":

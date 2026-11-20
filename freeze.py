@@ -1,13 +1,12 @@
 """Record the frozen Jev rule before any held-out score is read.
 
-    .venv/bin/python v2/freeze.py   # writes v2/frozen.json, and refuses to overwrite a different freeze
+    .venv/bin/python freeze.py   # writes frozen.json, and refuses to overwrite a different freeze
 """
 
 import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
 import jev_question as jq
 import jev
 import labeler
